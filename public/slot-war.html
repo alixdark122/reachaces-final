@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Slot War — Team Duel Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* (copy all the CSS from your original slot-war.html – unchanged) */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(25,198,253,0.15), transparent), radial-gradient(ellipse 60% 80% at 80% 60%, rgba(6,93,230,0.1), transparent), #0a0c12; min-height: 100vh; padding: 24px; color: #e2e8f0; }
+        .game-container { max-width: 1600px; margin: 0 auto; background: rgba(10,14,23,0.6); backdrop-filter: blur(12px); border-radius: 48px; padding: 24px 28px; border: 1px solid rgba(25,198,253,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        .title { text-align: center; font-size: 3rem; font-weight: 800; font-family: 'Orbitron', monospace; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; text-shadow: 0 0 20px rgba(25,198,253,0.3); animation: titlePulse 1.5s infinite; }
+        @keyframes titlePulse { 0% { text-shadow: 0 0 5px #19C6FD; } 50% { text-shadow: 0 0 25px #19C6FD, 0 0 10px #3b82f6; } 100% { text-shadow: 0 0 5px #19C6FD; } }
+        .sub { text-align: center; margin-bottom: 28px; font-weight: 500; color: #94a3b8; }
+        .three-columns { display: flex; flex-wrap: wrap; gap: 24px; }
+        .left-column { flex: 1; min-width: 280px; }
+        .middle-column { flex: 1.5; min-width: 400px; display: flex; flex-direction: column; gap: 20px; }
+        .right-column { flex: 1; min-width: 280px; }
+        .panel { background: rgba(15,23,42,0.6); backdrop-filter: blur(8px); border-radius: 28px; padding: 20px; border: 1px solid rgba(25,198,253,0.2); box-shadow: 0 4px 16px rgba(0,0,0,0.2); margin-bottom: 20px; transition: 0.2s; }
+        .team-panel { background: rgba(15,23,42,0.7); }
+        .panel-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 16px; color: #19C6FD; border-left: 4px solid #19C6FD; padding-left: 12px; font-family: 'Orbitron', monospace; letter-spacing: 1px; }
+        .team-list { max-height: 350px; overflow-y: auto; margin-top: 16px; scrollbar-width: thin; }
+        .team-item { background: rgba(30,41,59,0.7); margin: 8px 0; padding: 8px 12px; border-radius: 60px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid rgba(25,198,253,0.15); color: #f1f5f9; }
+        .team-name { font-weight: 600; word-break: break-word; }
+        .team-points { font-family: monospace; font-size: 0.85rem; background: #0f172a; padding: 2px 8px; border-radius: 60px; margin-left: 8px; }
+        .remove-participant { background: #dc2626; border: none; border-radius: 40px; padding: 2px 10px; color: white; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .remove-participant:hover { transform: scale(1.05); background: #ef4444; }
+        .slot-select { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25,198,253,0.3); background: #0f172a; color: #f1f5f9; outline: none; font-family: inherit; margin-bottom: 12px; }
+        .slot-select optgroup { background: #1e293b; color: #f1f5f9; }
+        .slot-preview { text-align: center; margin: 10px 0; }
+        .slot-preview img { width: 110px; height: 154px; object-fit: contain; border-radius: 12px; background: #1e293b; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .slot-name { font-size: 0.85rem; margin-top: 5px; text-align: center; color: #cbd5e1; }
+        .btn, button:not(.remove-participant):not(.filter-actions button) {
+            background: linear-gradient(135deg, #19C6FD, #3b82f6);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        button:not(.remove-participant):not(.filter-actions button):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25,198,253,0.4);
+        }
+        .btn-secondary, .btn-danger, .btn-success { background: #334155; }
+        .btn-danger { background: #dc2626; }
+        .btn-success { background: #22c55e; }
+        .connection-status { font-size: 0.8rem; margin-top: 10px; padding: 8px 12px; border-radius: 60px; text-align: center; background: rgba(255,255,255,0.08); color: #cbd5e1; }
+        .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; }
+        .winner-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 48px; padding: 40px 60px; text-align: center; border: 2px solid #19C6FD; max-width: 600px; width: 90%; color: #f1f5f9; }
+        .winner-card h1 { font-size: 2.5rem; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .winner-name { font-size: 2.8rem; font-weight: 800; margin: 20px 0; text-shadow: 0 0 10px #19C6FD; font-family: 'Orbitron', monospace; }
+        .winner-slot-img { width: 100px; margin: 10px auto; border-radius: 12px; }
+        .confetti-piece { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 9999; animation: confettiFall 1.5s ease-out forwards; }
+        @keyframes confettiFall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+        .toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .toggle-group button { flex: 1; margin-bottom: 0; }
+        .toggle-group .btn-success.joining-open { box-shadow: 0 0 12px #22c55e; border: 1px solid #22c55e; }
+        .toggle-group .btn-danger.joining-closed { box-shadow: 0 0 12px #dc2626; border: 1px solid #dc2626; }
+        .input-field { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25,198,253,0.3); background: #0f172a; color: #f1f5f9; outline: none; margin-bottom: 12px; }
+        .filter-panel { max-height: 300px; overflow-y: auto; margin-bottom: 12px; }
+        .filter-provider { display: flex; align-items: center; gap: 8px; margin: 6px 0; cursor: pointer; font-size: 0.85rem; }
+        .filter-provider:hover { background: rgba(25,198,253,0.1); border-radius: 20px; padding-left: 4px; }
+        .filter-provider input { width: 16px; height: 16px; cursor: pointer; accent-color: #19C6FD; }
+        .filter-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+        .filter-actions button { flex: 1; background: #1e293b; border: none; padding: 4px 8px; border-radius: 60px; font-size: 0.75rem; cursor: pointer; color: #cbd5e1; transition: 0.1s; }
+        .filter-actions button:hover { background: #334155; transform: translateY(-1px); }
+        .wheel-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 20000; cursor: default; }
+        .wheel-container { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 48px; padding: 40px; max-width: 600px; width: 90%; text-align: center; border: 2px solid #19C6FD; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .wheel-title { font-size: 2rem; font-weight: 800; margin-bottom: 20px; color: #19C6FD; font-family: 'Orbitron', monospace; }
+        .wheel-viewport { background: #020617; border-radius: 20px; padding: 20px; overflow: hidden; height: 200px; position: relative; margin: 20px 0; }
+        .wheel-scroller { transition: transform cubic-bezier(0.05, 0.9, 0.2, 1); }
+        .wheel-item { padding: 12px; font-size: 1.3rem; font-weight: 700; text-align: center; border-bottom: 1px solid #334155; color: #f1f5f9; }
+        .wheel-pointer { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 15px solid #19C6FD; border-top: 10px solid transparent; border-bottom: 10px solid transparent; filter: drop-shadow(0 0 2px black); pointer-events: none; z-index: 10; }
+        .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .action-group { display: flex; gap: 8px; }
+        .action-group button { flex: 1; margin: 0; }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="title">SLOT WAR</div>
+    <div class="sub">Viewers type <strong>!A</strong> or <strong>!B</strong> to join a team (once per round)</div>
+    <div class="three-columns">
+        <div class="left-column">
+            <div id="kickPanel" class="panel">
+                <div class="panel-title">Kick Connection</div>
+                <div id="userInfoArea" style="margin-bottom: 16px;"></div>
+                <button id="loginBtn" class="btn-blue">Login with Kick</button>
+                <input id="channelNameInput" class="input-field" placeholder="Enter channel name">
+                <button id="connectChannelBtn" class="btn-blue">Connect</button>
+                <div id="statusDisplay" class="connection-status">Not logged in</div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Streamer Controls</div>
+                <div class="toggle-group">
+                    <button id="openJoiningBtn" class="btn-success">Open Joining</button>
+                    <button id="closeJoiningBtn" class="btn-danger">Close Joining</button>
+                </div>
+                <button id="clearTeamsBtn" class="btn-secondary">Clear Teams</button>
+                <button id="resetGameBtn" class="btn-secondary">Reset Game</button>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Manual Add (Test)</div>
+                <input type="text" id="manualUsername" class="input-field" placeholder="Username (optional)" maxlength="20">
+                <div class="action-group" style="display: flex; gap: 8px;">
+                    <button id="manualAddA" class="btn-success" style="flex:1;">Add to Team A</button>
+                    <button id="manualAddB" class="btn-danger" style="flex:1;">Add to Team B</button>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">Provider Filters</div>
+                <input type="text" id="filterSearch" class="input-field" placeholder="Search providers...">
+                <div class="filter-actions">
+                    <button id="selectAllBtn">Select All</button>
+                    <button id="deselectAllBtn">Deselect All</button>
+                    <button id="clearFiltersBtn">Clear Filters</button>
+                </div>
+                <div id="providerFilterList" class="filter-panel"></div>
+            </div>
+        </div>
+        <div class="middle-column">
+            <div style="display: flex; gap: 20px;">
+                <div class="panel team-panel" style="flex:1">
+                    <div class="panel-title">TEAM A <span id="teamACount">(0)</span></div>
+                    <div id="teamAList" class="team-list"></div>
+                </div>
+                <div class="panel team-panel" style="flex:1">
+                    <div class="panel-title">TEAM B <span id="teamBCount">(0)</span></div>
+                    <div id="teamBList" class="team-list"></div>
+                </div>
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="panel">
+                <div class="panel-title">Select Slots</div>
+                <label style="font-size:0.85rem">Slot for Team A</label>
+                <select id="slotASelect" class="slot-select"></select>
+                <div id="slotAPreview" class="slot-preview"></div>
+                <div id="slotAName" class="slot-name"></div>
+                <label style="font-size:0.85rem">Slot for Team B</label>
+                <select id="slotBSelect" class="slot-select"></select>
+                <div id="slotBPreview" class="slot-preview"></div>
+                <div id="slotBName" class="slot-name"></div>
+                <div class="action-buttons">
+                    <div class="action-group">
+                        <button id="givePointsA" style="background:linear-gradient(135deg,#19C6FD,#3b82f6);">Give Points to Team A</button>
+                        <button id="givePointsB" style="background:linear-gradient(135deg,#19C6FD,#3b82f6);">Give Points to Team B</button>
+                    </div>
+                    <div class="action-group">
+                        <button id="pickWinnerA" style="background:linear-gradient(135deg,#f59e0b,#eab308);">Pick Winner from Team A</button>
+                        <button id="pickWinnerB" style="background:linear-gradient(135deg,#f59e0b,#eab308);">Pick Winner from Team B</button>
+                    </div>
+                    <button id="selectSlotsBtn" style="background: linear-gradient(135deg, #f59e0b, #eab308);">Select Slots</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========== UNIQUE CLIENT ID ==========
+    const clientId = Math.random().toString(36).substring(2, 15);
+    console.log('Client ID:', clientId);
+
+    // ========== 1. LOAD SLOT DATA ==========
+    let slotData = [];
+
+    async function loadSlotData() {
+        try {
+            const res = await fetch('/slots.json');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            slotData = await res.json();
+            console.log(`Loaded ${slotData.length} slots`);
+            buildProviderFilters();
+            updateSlotDropdowns();
+            if (slotData.length) {
+                selectedSlotA = slotData[0];
+                selectedSlotB = slotData[0];
+                updateSlotPreview('A', selectedSlotA);
+                updateSlotPreview('B', selectedSlotB);
+                slotASelect.value = slotData[0].name;
+                slotBSelect.value = slotData[0].name;
+                updateSlotNameDisplay();
+                sendSlotsToServer();
+            }
+        } catch (err) {
+            console.error('Failed to load slots.json:', err);
+        }
+    }
+
+    // ========== 2. GLOBAL STATE ==========
+    let participants = [];
+    let joinedUsers = new Set();
+    let joiningOpen = true;
+    let selectedSlotA = null;
+    let selectedSlotB = null;
+    let kickBrowserSocket = null;
+    let isLoggedIn = false;
+    let currentChannel = null;
+    let kickToken = null;
+    let reconnectTimer = null;
+    let reconnectAttempt = 0;
+    let manualDisconnect = false;
+    let currentWinnerOverlay = null;
+
+    let selectedProviders = new Set();
+    let providerSearchTerm = '';
+
+    const loginBtn = document.getElementById('loginBtn');
+    const channelNameInput = document.getElementById('channelNameInput');
+    const connectChannelBtn = document.getElementById('connectChannelBtn');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const userInfoArea = document.getElementById('userInfoArea');
+    const openJoiningBtn = document.getElementById('openJoiningBtn');
+    const closeJoiningBtn = document.getElementById('closeJoiningBtn');
+    const clearTeamsBtn = document.getElementById('clearTeamsBtn');
+    const resetGameBtn = document.getElementById('resetGameBtn');
+    const givePointsA = document.getElementById('givePointsA');
+    const givePointsB = document.getElementById('givePointsB');
+    const pickWinnerA = document.getElementById('pickWinnerA');
+    const pickWinnerB = document.getElementById('pickWinnerB');
+    const selectSlotsBtn = document.getElementById('selectSlotsBtn');
+    const slotASelect = document.getElementById('slotASelect');
+    const slotBSelect = document.getElementById('slotBSelect');
+    const slotAPreview = document.getElementById('slotAPreview');
+    const slotBPreview = document.getElementById('slotBPreview');
+    const slotAName = document.getElementById('slotAName');
+    const slotBName = document.getElementById('slotBName');
+    const gameMessageSpan = document.getElementById('gameMessage') || (() => { const s = document.createElement('div'); s.id = 'gameMessage'; document.body.appendChild(s); return s; })();
+
+    const manualUsername = document.getElementById('manualUsername');
+    const manualAddA = document.getElementById('manualAddA');
+    const manualAddB = document.getElementById('manualAddB');
+
+    // ========== WEBSOCKET SYNC (for overlay) ==========
+    let ws = null;
+
+    function connectWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}`;
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+            console.log('Game WebSocket connected, clientId:', clientId);
+            sendParticipantsToServer();
+            sendSlotsToServer();
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const { type, data } = JSON.parse(event.data);
+                if (type === 'participants') {
+                    if (JSON.stringify(data) !== JSON.stringify(participants)) {
+                        participants = data;
+                        joinedUsers.clear();
+                        participants.forEach(p => joinedUsers.add(p.name.toLowerCase()));
+                        renderTeams();
+                        saveState();
+                    }
+                } else if (type === 'slots') {
+                    if (data.teamA && data.teamA !== selectedSlotA) {
+                        selectedSlotA = data.teamA;
+                        updateSlotPreview('A', selectedSlotA);
+                        if (slotASelect && selectedSlotA) slotASelect.value = selectedSlotA.name;
+                    }
+                    if (data.teamB && data.teamB !== selectedSlotB) {
+                        selectedSlotB = data.teamB;
+                        updateSlotPreview('B', selectedSlotB);
+                        if (slotBSelect && selectedSlotB) slotBSelect.value = selectedSlotB.name;
+                    }
+                    updateSlotNameDisplay();
+                }
+            } catch(e) { console.warn(e); }
+        };
+
+        ws.onclose = () => {
+            console.log('Game WebSocket disconnected, reconnecting in 1s...');
+            setTimeout(connectWebSocket, 1000);
+        };
+    }
+
+    function sendParticipantsToServer() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'updateParticipants', data: participants, clientId }));
+        }
+    }
+
+    function sendSlotsToServer() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'updateSlots', data: { teamA: selectedSlotA, teamB: selectedSlotB }, clientId }));
+        }
+    }
+
+    // ========== GAME LOGIC ==========
+    function renderTeams() {
+        const teamAList = document.getElementById('teamAList');
+        const teamBList = document.getElementById('teamBList');
+        teamAList.innerHTML = '';
+        teamBList.innerHTML = '';
+        let aCount = 0, bCount = 0;
+        const sorted = [...participants].sort((a,b) => a.name.localeCompare(b.name));
+        sorted.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'team-item';
+            div.innerHTML = `<span class="team-name">${escapeHtml(p.name)} <span class="team-points">${p.points || 0}</span></span><button class="remove-participant" data-id="${p.id}" data-team="${p.team}">X</button>`;
+            if (p.team === 'A') {
+                teamAList.appendChild(div);
+                aCount++;
+            } else {
+                teamBList.appendChild(div);
+                bCount++;
+            }
+        });
+        document.getElementById('teamACount').innerText = `(${aCount})`;
+        document.getElementById('teamBCount').innerText = `(${bCount})`;
+
+        if (teamAList.lastChild) teamAList.scrollTop = teamAList.scrollHeight;
+        if (teamBList.lastChild) teamBList.scrollTop = teamBList.scrollHeight;
+
+        document.querySelectorAll('.remove-participant').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseFloat(btn.getAttribute('data-id'));
+                participants = participants.filter(p => p.id !== id);
+                renderTeams();
+                saveState();
+                sendParticipantsToServer();
+            });
+        });
+    }
+
+    function addParticipantToTeam(username, team) {
+        if (!joiningOpen) return false;
+        if (!username || !team) return false;
+        const name = username.trim().toLowerCase();
+        if (joinedUsers.has(name)) return false;
+        const existing = participants.find(p => p.name.toLowerCase() === name);
+        if (existing) return false;
+        const displayName = username.trim();
+        const savedPoints = userPointsMap.get(name) || 0;
+        participants.push({ name: displayName, id: Date.now() + Math.random(), team: team.toUpperCase(), points: savedPoints });
+        joinedUsers.add(name);
+        renderTeams();
+        saveState();
+        sendParticipantsToServer();
+        return true;
+    }
+
+    function givePointsToTeam(team) {
+        const teamMembers = participants.filter(p => p.team === team);
+        if (teamMembers.length === 0) {
+            alert(`No members in Team ${team}. No points given.`);
+            return;
+        }
+        teamMembers.forEach(p => {
+            p.points = (p.points || 0) + 1;
+        });
+        renderTeams();
+        saveState();
+        sendParticipantsToServer();
+        gameMessageSpan.innerText = `Added 1 point to all ${teamMembers.length} members of Team ${team}!`;
+        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 3000);
+    }
+
+    function handleChatMessage(username, content) {
+        const cmd = content.trim().toLowerCase();
+        if (cmd === '!a' || cmd === '!join a') {
+            addParticipantToTeam(username, 'A');
+        } else if (cmd === '!b' || cmd === '!join b') {
+            addParticipantToTeam(username, 'B');
+        }
+    }
+
+    // ========== PROVIDER FILTERS ==========
+    function buildProviderFilters() {
+        let providers = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
+        selectedProviders.clear();
+        providers.forEach(p => selectedProviders.add(p));
+        renderProviderFilterList();
+    }
+    function renderProviderFilterList() {
+        const container = document.getElementById('providerFilterList');
+        if (!container) return;
+        let providers = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
+        if (providerSearchTerm) {
+            providers = providers.filter(p => p.toLowerCase().includes(providerSearchTerm.toLowerCase()));
+        }
+        container.innerHTML = '';
+        providers.forEach(provider => {
+            const div = document.createElement('div');
+            div.className = 'filter-provider';
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = selectedProviders.has(provider);
+            cb.addEventListener('change', (e) => {
+                if (cb.checked) selectedProviders.add(provider);
+                else selectedProviders.delete(provider);
+                updateSlotDropdowns();
+            });
+            const label = document.createElement('label');
+            label.textContent = provider;
+            div.appendChild(cb);
+            div.appendChild(label);
+            container.appendChild(div);
+        });
+    }
+    function updateSlotDropdowns() {
+        if (!slotData.length) return;
+        let filteredSlots = slotData.filter(slot => selectedProviders.has(slot.provider));
+        filteredSlots.sort((a,b) => a.name.localeCompare(b.name));
+        const groups = {};
+        filteredSlots.forEach(slot => {
+            if (!groups[slot.provider]) groups[slot.provider] = [];
+            groups[slot.provider].push(slot);
+        });
+        const sortedProviders = Object.keys(groups).sort((a,b) => a.localeCompare(b));
+        for (const select of [slotASelect, slotBSelect]) {
+            const currentA = selectedSlotA?.name;
+            const currentB = selectedSlotB?.name;
+            select.innerHTML = '';
+            for (const provider of sortedProviders) {
+                const group = document.createElement('optgroup');
+                group.label = provider;
+                groups[provider].forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot.name;
+                    option.textContent = slot.name;
+                    group.appendChild(option);
+                });
+                select.appendChild(group);
+            }
+            if (filteredSlots.length) {
+                const prevName = select.id === 'slotASelect' ? currentA : currentB;
+                if (prevName && filteredSlots.some(s => s.name === prevName)) {
+                    select.value = prevName;
+                } else {
+                    select.value = filteredSlots[0].name;
+                }
+            }
+        }
+        selectedSlotA = getSelectedSlot('A');
+        selectedSlotB = getSelectedSlot('B');
+        updateSlotPreview('A', selectedSlotA);
+        updateSlotPreview('B', selectedSlotB);
+        updateSlotNameDisplay();
+        sendSlotsToServer();
+    }
+    document.getElementById('filterSearch')?.addEventListener('input', (e) => {
+        providerSearchTerm = e.target.value;
+        renderProviderFilterList();
+    });
+    document.getElementById('selectAllBtn')?.addEventListener('click', () => {
+        const providers = [...new Set(slotData.map(slot => slot.provider))];
+        providers.forEach(p => selectedProviders.add(p));
+        renderProviderFilterList();
+        updateSlotDropdowns();
+    });
+    document.getElementById('deselectAllBtn')?.addEventListener('click', () => {
+        selectedProviders.clear();
+        renderProviderFilterList();
+        updateSlotDropdowns();
+    });
+    document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
+        providerSearchTerm = '';
+        document.getElementById('filterSearch').value = '';
+        const providers = [...new Set(slotData.map(slot => slot.provider))];
+        providers.forEach(p => selectedProviders.add(p));
+        renderProviderFilterList();
+        updateSlotDropdowns();
+    });
+    function updateSlotPreview(team, slot) {
+        const previewDiv = team === 'A' ? slotAPreview : slotBPreview;
+        if (!slot) {
+            previewDiv.innerHTML = '';
+            return;
+        }
+        previewDiv.innerHTML = `<img src="${slot.image_url}" style="width:110px;height:154px;object-fit:contain;border-radius:12px;">`;
+        updateSlotNameDisplay();
+    }
+    function updateSlotNameDisplay() {
+        if (selectedSlotA) {
+            slotAName.innerHTML = `<div style="font-size:0.85rem;margin-top:5px;text-align:center;">${escapeHtml(selectedSlotA.name)}</div>`;
+        } else {
+            slotAName.innerHTML = '';
+        }
+        if (selectedSlotB) {
+            slotBName.innerHTML = `<div style="font-size:0.85rem;margin-top:5px;text-align:center;">${escapeHtml(selectedSlotB.name)}</div>`;
+        } else {
+            slotBName.innerHTML = '';
+        }
+    }
+    function getSelectedSlot(team) {
+        const select = team === 'A' ? slotASelect : slotBSelect;
+        const name = select.value;
+        return slotData.find(s => s.name === name);
+    }
+    slotASelect.addEventListener('change', () => {
+        selectedSlotA = getSelectedSlot('A');
+        updateSlotPreview('A', selectedSlotA);
+        updateSlotNameDisplay();
+        sendSlotsToServer();
+    });
+    slotBSelect.addEventListener('change', () => {
+        selectedSlotB = getSelectedSlot('B');
+        updateSlotPreview('B', selectedSlotB);
+        updateSlotNameDisplay();
+        sendSlotsToServer();
+    });
+
+    // ========== WHEEL ==========
+    function showWheelOverlay(team, addPoints = false) {
+        const teamMembers = participants.filter(p => p.team === team);
+        if (teamMembers.length === 0) {
+            alert(`No members in Team ${team}. Cannot pick winner.`);
+            return false;
+        }
+        const names = teamMembers.map(p => p.name);
+        const overlay = document.createElement('div');
+        overlay.className = 'wheel-overlay';
+        overlay.innerHTML = `
+            <div class="wheel-container">
+                <div class="wheel-title">Picking Winner from Team ${team}</div>
+                <div class="wheel-viewport">
+                    <div id="wheelScroller" class="wheel-scroller"></div>
+                    <div class="wheel-pointer"></div>
+                </div>
+                <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
+                <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
+            </div>`;
+        document.body.appendChild(overlay);
+        const scroller = document.getElementById('wheelScroller');
+        const repeatFactor = 50;
+        let repeated = [];
+        for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
+        scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+        const firstItem = scroller.querySelector('.wheel-item');
+        const itemHeight = firstItem.getBoundingClientRect().height;
+        const viewportHeight = 200;
+        const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+        const totalItems = repeated.length;
+        const winnerIndex = Math.floor(Math.random() * names.length);
+        const winnerName = names[winnerIndex];
+        let targetIdx = -1;
+        const middleStart = Math.floor(totalItems * 0.3);
+        const middleEnd = Math.floor(totalItems * 0.7);
+        for (let i = middleStart; i < middleEnd; i++) {
+            if (repeated[i] === winnerName) {
+                targetIdx = i;
+                break;
+            }
+        }
+        if (targetIdx === -1) {
+            for (let i = 0; i < totalItems; i++) {
+                if (repeated[i] === winnerName) {
+                    targetIdx = i;
+                    break;
+                }
+            }
+        }
+        if (targetIdx === -1) targetIdx = 0;
+        const targetOffset = -(targetIdx * itemHeight) + centerOffset;
+        const duration = 7 + Math.random() * 3;
+        scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
+        scroller.style.transform = `translateY(${targetOffset}px)`;
+        const resultDiv = document.getElementById('wheelResult');
+        scroller.addEventListener('transitionend', () => {
+            if (addPoints) {
+                const winnerPlayer = teamMembers.find(p => p.name === winnerName);
+                if (winnerPlayer) {
+                    winnerPlayer.points = (winnerPlayer.points || 0) + 1;
+                    resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)} (+1 point)`;
+                } else {
+                    resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
+                }
+                renderTeams();
+                saveState();
+                sendParticipantsToServer();
+            } else {
+                resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
+            }
+            playWinSound();
+            shootConfetti();
+            const slot = team === 'A' ? selectedSlotA : selectedSlotB;
+            if (slot) {
+                showWinnerOverlay(winnerName, team, slot);
+            }
+        }, { once: true });
+        document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
+        return true;
+    }
+    function playWinSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume();
+            const now = ctx.currentTime;
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.value = 880;
+            g.gain.setValueAtTime(0.2, now);
+            g.gain.exponentialRampToValueAtTime(0.00001, now + 0.5);
+            o.start(now); o.stop(now + 0.5);
+        } catch(e) {}
+    }
+    function shootConfettiPiece() {
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.style.cssText = `left:${Math.random()*window.innerWidth}px;top:-20px;background:hsl(${Math.random()*360},80%,60%);width:${Math.random()*10+4}px;height:${Math.random()*10+4}px;border-radius:${Math.random()>.5?'50%':'0'}`;
+        document.body.appendChild(c);
+        c.animate([{ transform: 'translateY(0px) rotate(0deg)', opacity: 1 }, { transform: `translateY(${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1500 }).onfinish = () => c.remove();
+    }
+    function shootConfetti() { for (let i = 0; i < 80; i++) setTimeout(shootConfettiPiece, i * 15); }
+    function showWinnerOverlay(winnerName, team, slot) {
+        if (currentWinnerOverlay) currentWinnerOverlay.remove();
+        const overlay = document.createElement('div');
+        overlay.className = 'winner-overlay';
+        overlay.innerHTML = `
+            <div class="winner-card">
+                <h1>WINNER!</h1>
+                <div class="winner-name">${escapeHtml(winnerName)}</div>
+                <div style="font-size:1.2rem;">Team ${team} wins with</div>
+                <div class="winner-slot-img"><img src="${slot.image_url}" style="width:100px;border-radius:12px;"></div>
+                <div>${escapeHtml(slot.name)}</div>
+                <button id="closeWinnerBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Continue</button>
+            </div>`;
+        document.body.appendChild(overlay);
+        currentWinnerOverlay = overlay;
+        document.getElementById('closeWinnerBtn').addEventListener('click', () => {
+            overlay.remove();
+            currentWinnerOverlay = null;
+        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    }
+
+    givePointsA.addEventListener('click', () => givePointsToTeam('A'));
+    givePointsB.addEventListener('click', () => givePointsToTeam('B'));
+    pickWinnerA.addEventListener('click', () => showWheelOverlay('A', false));
+    pickWinnerB.addEventListener('click', () => showWheelOverlay('B', false));
+    selectSlotsBtn.addEventListener('click', () => {
+        selectedSlotA = getSelectedSlot('A');
+        selectedSlotB = getSelectedSlot('B');
+        updateSlotPreview('A', selectedSlotA);
+        updateSlotPreview('B', selectedSlotB);
+        updateSlotNameDisplay();
+        sendSlotsToServer();
+        if (selectedSlotA && selectedSlotB) {
+            gameMessageSpan.innerText = `Slots selected: ${selectedSlotA.name} vs ${selectedSlotB.name}`;
+        } else {
+            gameMessageSpan.innerText = 'Please select both slots.';
+        }
+    });
+
+    // ========== CHAT CONNECTION ==========
+    async function resolveKickChatroomId(channelName) {
+        try {
+            const res = await fetch(`/api/kick/channel/${encodeURIComponent(channelName)}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const id = data?.chatroom?.id || data?.data?.chatroom?.id || data?.chatroom_id;
+            if (id) return id;
+            throw new Error('No chatroom id');
+        } catch (err) {
+            console.error('Proxy resolve error:', err);
+            throw new Error('Unable to resolve Kick chatroom ID');
+        }
+    }
+    function stopKickBrowserChat() {
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        reconnectAttempt = 0;
+        if (kickBrowserSocket) {
+            try { kickBrowserSocket.close(); } catch(e) {}
+            kickBrowserSocket = null;
+        }
+    }
+    async function startKickBrowserChat(channelName) {
+        stopKickBrowserChat();
+        if (manualDisconnect) return;
+        try {
+            setConnectionStatus(`Resolving channel ${channelName}...`, 'connected');
+            const chatroomId = await resolveKickChatroomId(channelName);
+            setConnectionStatus(`Connecting to ${channelName} chat...`, 'connected');
+            const pusherUrl = 'wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false';
+            const wsChat = new WebSocket(pusherUrl);
+            wsChat.addEventListener('open', () => {
+                wsChat.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: `chatrooms.${chatroomId}.v2` } }));
+                setConnectionStatus(`Listening to ${channelName}`, 'connected');
+                gameMessageSpan.innerText = `Listening for !A and !B in #${channelName}`;
+                reconnectAttempt = 0;
+            });
+            wsChat.addEventListener('message', (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.event === 'App\\Events\\ChatMessageEvent') {
+                        const td = JSON.parse(msg.data);
+                        handleChatMessage(td?.sender?.username, td?.content?.trim());
+                    }
+                } catch(e) {}
+            });
+            wsChat.addEventListener('close', () => {
+                setConnectionStatus(`Disconnected from ${channelName}`, 'failed');
+                if (!manualDisconnect && currentChannel && isLoggedIn) {
+                    const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempt), 30000);
+                    reconnectAttempt++;
+                    setConnectionStatus(`Reconnecting in ${Math.round(delay/1000)}s...`, 'reconnecting');
+                    reconnectTimer = setTimeout(() => startKickBrowserChat(currentChannel), delay);
+                }
+            });
+            wsChat.addEventListener('error', (error) => {
+                console.error('WebSocket error:', error);
+                setConnectionStatus('Kick chat error', 'failed');
+                if (!manualDisconnect && currentChannel && isLoggedIn) {
+                    const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempt), 30000);
+                    reconnectAttempt++;
+                    setConnectionStatus(`Reconnecting in ${Math.round(delay/1000)}s...`, 'reconnecting');
+                    reconnectTimer = setTimeout(() => startKickBrowserChat(currentChannel), delay);
+                }
+            });
+            kickBrowserSocket = wsChat;
+            currentChannel = channelName;
+            saveState();
+        } catch (err) {
+            setConnectionStatus(`${err.message}`, 'failed');
+            gameMessageSpan.innerText = err.message;
+        }
+    }
+    function setConnectionStatus(message, status) {
+        statusDisplay.innerHTML = message;
+        statusDisplay.className = 'connection-status';
+    }
+    function saveState() {
+        if (!isLoggedIn) return;
+        localStorage.setItem('slotWarState', JSON.stringify({
+            participants, joiningOpen, selectedSlotA: selectedSlotA?.name, selectedSlotB: selectedSlotB?.name,
+            kickToken, currentChannel, isLoggedIn, joinedUsers: Array.from(joinedUsers)
+        }));
+    }
+    function loadState() {
+        const saved = localStorage.getItem('slotWarState');
+        if (!saved) return;
+        try {
+            const s = JSON.parse(saved);
+            if (!s.isLoggedIn || !s.currentChannel) return;
+            participants = s.participants || [];
+            joiningOpen = s.joiningOpen !== false;
+            if (s.selectedSlotA) selectedSlotA = slotData.find(sl => sl.name === s.selectedSlotA);
+            if (s.selectedSlotB) selectedSlotB = slotData.find(sl => sl.name === s.selectedSlotB);
+            kickToken = s.kickToken;
+            currentChannel = s.currentChannel;
+            isLoggedIn = s.isLoggedIn;
+            if (s.joinedUsers) joinedUsers = new Set(s.joinedUsers);
+            if (currentChannel) channelNameInput.value = currentChannel;
+            if (isLoggedIn && currentChannel) {
+                userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
+                setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
+                loginBtn.textContent = 'Disconnect';
+                startKickBrowserChat(currentChannel);
+            }
+            renderTeams();
+            if (selectedSlotA) updateSlotPreview('A', selectedSlotA);
+            if (selectedSlotB) updateSlotPreview('B', selectedSlotB);
+            if (slotASelect && selectedSlotA) slotASelect.value = selectedSlotA.name;
+            if (slotBSelect && selectedSlotB) slotBSelect.value = selectedSlotB.name;
+            updateSlotNameDisplay();
+            sendParticipantsToServer();
+            sendSlotsToServer();
+        } catch(e) { console.warn(e); }
+    }
+    
+    // ========== MANUAL ADD HANDLERS ==========
+    manualAddA.addEventListener('click', () => {
+        let name = manualUsername.value.trim();
+        if (!name) name = 'TestUser_' + Math.floor(Math.random() * 1000);
+        addParticipantToTeam(name, 'A');
+        manualUsername.value = '';
+    });
+    manualAddB.addEventListener('click', () => {
+        let name = manualUsername.value.trim();
+        if (!name) name = 'TestUser_' + Math.floor(Math.random() * 1000);
+        addParticipantToTeam(name, 'B');
+        manualUsername.value = '';
+    });
+
+    openJoiningBtn.addEventListener('click', () => {
+        joiningOpen = true;
+        openJoiningBtn.classList.add('joining-open');
+        closeJoiningBtn.classList.remove('joining-closed');
+        saveState();
+    });
+    closeJoiningBtn.addEventListener('click', () => {
+        joiningOpen = false;
+        closeJoiningBtn.classList.add('joining-closed');
+        openJoiningBtn.classList.remove('joining-open');
+        saveState();
+    });
+    if (joiningOpen) openJoiningBtn.classList.add('joining-open');
+    else closeJoiningBtn.classList.add('joining-closed');
+
+    let userPointsMap = new Map();
+    function clearAllTeams() {
+        participants.forEach(p => {
+            const key = p.name.toLowerCase();
+            userPointsMap.set(key, (userPointsMap.get(key) || 0) + (p.points || 0));
+        });
+        participants = [];
+        joinedUsers.clear();
+        renderTeams();
+        if (slotData.length) {
+            selectedSlotA = slotData[0];
+            selectedSlotB = slotData[0];
+            updateSlotPreview('A', selectedSlotA);
+            updateSlotPreview('B', selectedSlotB);
+            slotASelect.value = slotData[0].name;
+            slotBSelect.value = slotData[0].name;
+            updateSlotNameDisplay();
+            sendSlotsToServer();
+        }
+        saveState();
+        sendParticipantsToServer();
+        gameMessageSpan.innerText = 'Teams cleared. Points preserved.';
+        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
+    }
+    clearTeamsBtn.addEventListener('click', clearAllTeams);
+    resetGameBtn.addEventListener('click', () => {
+        if (confirm("RESET GAME\n\nThis will reset ALL points and clear all teams.\n\nAre you sure?")) {
+            userPointsMap.clear();
+            participants = [];
+            joinedUsers.clear();
+            renderTeams();
+            if (slotData.length) {
+                selectedSlotA = slotData[0];
+                selectedSlotB = slotData[0];
+                updateSlotPreview('A', selectedSlotA);
+                updateSlotPreview('B', selectedSlotB);
+                slotASelect.value = slotData[0].name;
+                slotBSelect.value = slotData[0].name;
+                updateSlotNameDisplay();
+                sendSlotsToServer();
+            } else {
+                selectedSlotA = null;
+                selectedSlotB = null;
+                slotAPreview.innerHTML = '';
+                slotBPreview.innerHTML = '';
+                slotAName.innerHTML = '';
+                slotBName.innerHTML = '';
+                sendSlotsToServer();
+            }
+            saveState();
+            sendParticipantsToServer();
+            gameMessageSpan.innerText = 'Game reset. All points cleared.';
+            setTimeout(() => gameMessageSpan.innerText = 'Ready.', 3000);
+        }
+    });
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m); }
+
+    // ========== IFRAME / STANDALONE AUTH ==========
+    let isIframe = window.parent !== window;
+
+    function handleTokenFromParent(event) {
+        if (event.data.type === 'KICK_TOKEN') {
+            kickToken = event.data.token;
+            currentChannel = event.data.channel;
+            if (currentChannel) {
+                userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
+                setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
+                loginBtn.textContent = 'Disconnect';
+                startKickBrowserChat(currentChannel);
+            } else {
+                userInfoArea.innerHTML = `<div>Logged in to Kick. Enter a channel to connect.</div>`;
+                setConnectionStatus('Logged in to Kick', 'connected');
+            }
+            isLoggedIn = true;
+            saveState();
+        }
+    }
+
+    if (isIframe) {
+        window.addEventListener('message', handleTokenFromParent);
+        window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+    }
+
+    // Standalone login (only if not in iframe)
+    if (!isIframe) {
+        loginBtn.addEventListener('click', () => {
+            if (isLoggedIn) {
+                manualDisconnect = true;
+                if (reconnectTimer) clearTimeout(reconnectTimer);
+                isLoggedIn = false; kickToken = null; currentChannel = null;
+                userInfoArea.innerHTML = '';
+                setConnectionStatus('Not logged in', 'disconnected');
+                loginBtn.textContent = 'Login with Kick';
+                participants = [];
+                joinedUsers.clear();
+                renderTeams();
+                stopKickBrowserChat();
+                localStorage.removeItem('slotWarState');
+                sendParticipantsToServer();
+                sendSlotsToServer();
+                return;
+            }
+            manualDisconnect = false;
+            window.open('/auth/kick', 'KickLogin', 'width=600,height=700');
+        });
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'KICK_TOKEN') {
+                manualDisconnect = false;
+                kickToken = event.data.token;
+                currentChannel = event.data.channel;
+                participants = [];
+                joinedUsers.clear();
+                renderTeams();
+                if (currentChannel) {
+                    userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
+                    setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
+                    gameMessageSpan.innerText = `Connected to ${currentChannel} chat. Waiting for messages...`;
+                    startKickBrowserChat(currentChannel);
+                } else {
+                    userInfoArea.innerHTML = `<div>Logged in to Kick. Enter a channel to connect.</div>`;
+                    setConnectionStatus('Logged in to Kick', 'connected');
+                }
+                loginBtn.textContent = 'Disconnect';
+                isLoggedIn = true;
+                localStorage.removeItem('slotWarState');
+                saveState();
+            }
+        });
+    }
+
+    connectChannelBtn.addEventListener('click', () => {
+        if (!isLoggedIn) { alert('Please log in first.'); return; }
+        const channel = channelNameInput.value.trim();
+        if (!channel) { alert('Enter a channel name.'); return; }
+        currentChannel = channel;
+        manualDisconnect = false;
+        startKickBrowserChat(currentChannel);
+        saveState();
+    });
+
+    // Start everything
+    connectWebSocket();
+    loadSlotData().then(() => {
+        loadState();
+        const savedMap = localStorage.getItem('slotWarUserPoints');
+        if (savedMap) {
+            try {
+                const parsed = JSON.parse(savedMap);
+                userPointsMap = new Map(parsed);
+            } catch(e) {}
+        }
+    });
+    setInterval(() => {
+        if (isLoggedIn) {
+            localStorage.setItem('slotWarUserPoints', JSON.stringify(Array.from(userPointsMap.entries())));
+        }
+    }, 5000);
+
+    // Hide own kick panel when inside iframe
+    if (isIframe) {
+        const kickPanel = document.getElementById('kickPanel');
+        if (kickPanel) kickPanel.style.display = 'none';
+    }
+</script>
+</body>
+</html>
