@@ -12,12 +12,26 @@
         .tab-btn.active { background: linear-gradient(135deg, #19C6FD, #3b82f6); color: white; border-color: transparent; box-shadow: 0 0 15px rgba(25,198,253,0.4); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        iframe { width: 100%; min-height: 1000px; border: none; border-radius: 28px; background: rgba(10,14,23,0.6); backdrop-filter: blur(12px); }
+        iframe { width: 100%; min-height: 940px; border: none; border-radius: 28px; background: rgba(10,14,23,0.6); backdrop-filter: blur(12px); margin-bottom: 20px; }
         .shared-panel { background: rgba(15,23,42,0.5); border-radius: 28px; padding: 16px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
         .kick-info { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
         .kick-info button { background: linear-gradient(135deg, #19C6FD, #3b82f6); border: none; padding: 8px 20px; border-radius: 60px; font-weight: 600; cursor: pointer; }
         .kick-info input { background: #0f172a; border: 1px solid rgba(25,198,253,0.3); padding: 8px 14px; border-radius: 60px; color: white; }
         .status { font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 60px; }
+        /* Asset container at the bottom of each tab */
+        .asset-container {
+            margin-top: 10px;
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 28px;
+            padding: 16px;
+            border: 1px solid rgba(25,198,253,0.2);
+        }
+        .asset-container img {
+            max-width: 80%;
+            border-radius: 10px;
+            max-height: 50px;
+        }
     </style>
 </head>
 <body>
@@ -38,9 +52,17 @@
 
 <div id="slotwar-content" class="tab-content active">
     <iframe src="/slot-war.html" id="slotwarFrame"></iframe>
+    <!-- Asset container for Slot War -->
+    <div class="asset-container">
+        <img src="/assets/reachacesText.png" alt="ReachAces Text Logo">
+    </div>
 </div>
 <div id="acerace-content" class="tab-content">
     <iframe src="/game.html" id="aceraceFrame"></iframe>
+    <!-- Asset container for Ace Race -->
+    <div class="asset-container">
+        <img src="/assets/reachacesText.png" alt="ReachAces Text Logo">
+    </div>
 </div>
 
 <script>
@@ -113,7 +135,6 @@
         document.getElementById('statusDisplay').innerHTML = `🟢 Connected to ${channel}`;
     });
 
-    // On page load, restore saved state and send token **once** after iframes are ready
     const savedToken = localStorage.getItem('kickToken');
     const savedChannel = localStorage.getItem('currentChannel');
     if (savedToken) {
@@ -128,7 +149,6 @@
             document.getElementById('statusDisplay').innerHTML = `🟢 Logged in to Kick`;
             document.getElementById('loginBtn').textContent = 'Disconnect';
         }
-        // Wait for both iframes to load, then send token once
         let attempts = 0;
         function sendOnce() {
             attempts++;
@@ -136,7 +156,7 @@
             const arFrame = document.getElementById('aceraceFrame');
             if (swFrame && swFrame.contentWindow && arFrame && arFrame.contentWindow) {
                 sendTokenToIframes();
-            } else if (attempts < 20) { // max 4 seconds
+            } else if (attempts < 20) {
                 setTimeout(sendOnce, 200);
             } else {
                 console.warn('Iframes not ready after 4 seconds, sending anyway');

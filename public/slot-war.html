@@ -6,31 +6,35 @@
     <title>Slot War — Team Duel Game</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        /* (copy all the CSS from your original slot-war.html – unchanged) */
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(25,198,253,0.15), transparent), radial-gradient(ellipse 60% 80% at 80% 60%, rgba(6,93,230,0.1), transparent), #0a0c12; min-height: 100vh; padding: 24px; color: #e2e8f0; }
-        .game-container { max-width: 1600px; margin: 0 auto; background: rgba(10,14,23,0.6); backdrop-filter: blur(12px); border-radius: 48px; padding: 24px 28px; border: 1px solid rgba(25,198,253,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-        .title { text-align: center; font-size: 3rem; font-weight: 800; font-family: 'Orbitron', monospace; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; text-shadow: 0 0 20px rgba(25,198,253,0.3); animation: titlePulse 1.5s infinite; }
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(25, 198, 253, 0.15), transparent), radial-gradient(ellipse 60% 80% at 80% 60%, rgba(6, 93, 230, 0.1), transparent), #0a0c12; min-height: 100vh; padding: 24px; color: #e2e8f0; }
+        /* Wider game container */
+        .game-container { max-width: 1800px; width: 95%; margin: 0 auto; background: rgba(10, 14, 23, 0.6); backdrop-filter: blur(12px); border-radius: 48px; padding: 24px 28px; border: 1px solid rgba(25, 198, 253, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
+        .title { text-align: center; font-size: 3rem; font-weight: 800; font-family: 'Orbitron', monospace; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; text-shadow: 0 0 20px rgba(25, 198, 253, 0.3); animation: titlePulse 1.5s infinite; }
         @keyframes titlePulse { 0% { text-shadow: 0 0 5px #19C6FD; } 50% { text-shadow: 0 0 25px #19C6FD, 0 0 10px #3b82f6; } 100% { text-shadow: 0 0 5px #19C6FD; } }
         .sub { text-align: center; margin-bottom: 28px; font-weight: 500; color: #94a3b8; }
         .three-columns { display: flex; flex-wrap: wrap; gap: 24px; }
         .left-column { flex: 1; min-width: 280px; }
-        .middle-column { flex: 1.5; min-width: 400px; display: flex; flex-direction: column; gap: 20px; }
+        .middle-column { flex: 2; min-width: 500px; display: flex; flex-direction: column; gap: 20px; }
         .right-column { flex: 1; min-width: 280px; }
-        .panel { background: rgba(15,23,42,0.6); backdrop-filter: blur(8px); border-radius: 28px; padding: 20px; border: 1px solid rgba(25,198,253,0.2); box-shadow: 0 4px 16px rgba(0,0,0,0.2); margin-bottom: 20px; transition: 0.2s; }
-        .team-panel { background: rgba(15,23,42,0.7); }
+        .panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); border-radius: 28px; padding: 20px; border: 1px solid rgba(25, 198, 253, 0.2); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); margin-bottom: 20px; transition: 0.2s; }
+        .team-panel { background: rgba(15, 23, 42, 0.7); height: auto; min-height: 600px; }
         .panel-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 16px; color: #19C6FD; border-left: 4px solid #19C6FD; padding-left: 12px; font-family: 'Orbitron', monospace; letter-spacing: 1px; }
-        .team-list { max-height: 350px; overflow-y: auto; margin-top: 16px; scrollbar-width: thin; }
-        .team-item { background: rgba(30,41,59,0.7); margin: 8px 0; padding: 8px 12px; border-radius: 60px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid rgba(25,198,253,0.15); color: #f1f5f9; }
+        .team-list { max-height: 600px; overflow-y: auto; margin-top: 16px; scrollbar-width: none; -ms-overflow-style: none; }
+        .team-list::-webkit-scrollbar { display: none; }
+        .team-item { background: rgba(30, 41, 59, 0.7); margin: 8px 0; padding: 8px 12px; border-radius: 60px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid rgba(25, 198, 253, 0.15); color: #f1f5f9; }
         .team-name { font-weight: 600; word-break: break-word; }
         .team-points { font-family: monospace; font-size: 0.85rem; background: #0f172a; padding: 2px 8px; border-radius: 60px; margin-left: 8px; }
         .remove-participant { background: #dc2626; border: none; border-radius: 40px; padding: 2px 10px; color: white; cursor: pointer; font-size: 12px; transition: 0.2s; }
         .remove-participant:hover { transform: scale(1.05); background: #ef4444; }
-        .slot-select { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25,198,253,0.3); background: #0f172a; color: #f1f5f9; outline: none; font-family: inherit; margin-bottom: 12px; }
+        .slot-select { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25, 198, 253, 0.3); background: #0f172a; color: #f1f5f9; outline: none; font-family: inherit; margin-bottom: 12px; }
         .slot-select optgroup { background: #1e293b; color: #f1f5f9; }
+        /* Larger slot preview */
         .slot-preview { text-align: center; margin: 10px 0; }
-        .slot-preview img { width: 110px; height: 154px; object-fit: contain; border-radius: 12px; background: #1e293b; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .slot-name { font-size: 0.85rem; margin-top: 5px; text-align: center; color: #cbd5e1; }
+        .slot-preview img { width: 140px; height: 196px; object-fit: contain; border-radius: 16px; background: #1e293b; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); transition: transform 0.2s; }
+        .slot-preview img:hover { transform: scale(1.02); }
+        /* Bigger slot name */
+        .slot-name { font-size: 1rem; margin-top: 8px; text-align: center; color: #cbd5e1; font-weight: 600; }
         .btn, button:not(.remove-participant):not(.filter-actions button) {
             background: linear-gradient(135deg, #19C6FD, #3b82f6);
             color: white;
@@ -46,7 +50,7 @@
         }
         button:not(.remove-participant):not(.filter-actions button):hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(25,198,253,0.4);
+            box-shadow: 0 4px 12px rgba(25, 198, 253, 0.4);
         }
         .btn-secondary, .btn-danger, .btn-success { background: #334155; }
         .btn-danger { background: #dc2626; }
@@ -63,11 +67,42 @@
         .toggle-group button { flex: 1; margin-bottom: 0; }
         .toggle-group .btn-success.joining-open { box-shadow: 0 0 12px #22c55e; border: 1px solid #22c55e; }
         .toggle-group .btn-danger.joining-closed { box-shadow: 0 0 12px #dc2626; border: 1px solid #dc2626; }
-        .input-field { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25,198,253,0.3); background: #0f172a; color: #f1f5f9; outline: none; margin-bottom: 12px; }
-        .filter-panel { max-height: 300px; overflow-y: auto; margin-bottom: 12px; }
-        .filter-provider { display: flex; align-items: center; gap: 8px; margin: 6px 0; cursor: pointer; font-size: 0.85rem; }
+        .input-field { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25, 198, 253, 0.3); background: #0f172a; color: #f1f5f9; outline: none; margin-bottom: 12px; }
+        .filter-panel { max-height: 300px; overflow-y: auto; margin-bottom: 12px; scrollbar-width: thin; }
+        .filter-provider { display: flex; align-items: center; gap: 12px; margin: 6px 0; cursor: pointer; font-size: 0.85rem; padding: 4px 0; }
         .filter-provider:hover { background: rgba(25,198,253,0.1); border-radius: 20px; padding-left: 4px; }
-        .filter-provider input { width: 16px; height: 16px; cursor: pointer; accent-color: #19C6FD; }
+        /* Custom checkboxes */
+        .filter-provider input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #19C6FD;
+            border-radius: 4px;
+            background: #0f172a;
+            cursor: pointer;
+            transition: all 0.1s;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .filter-provider input[type="checkbox"]:checked {
+            background: #19C6FD;
+            position: relative;
+        }
+        .filter-provider input[type="checkbox"]:checked::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .filter-provider input[type="checkbox"]:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 4px #19C6FD;
+        }
         .filter-actions { display: flex; gap: 8px; margin-bottom: 12px; }
         .filter-actions button { flex: 1; background: #1e293b; border: none; padding: 4px 8px; border-radius: 60px; font-size: 0.75rem; cursor: pointer; color: #cbd5e1; transition: 0.1s; }
         .filter-actions button:hover { background: #334155; transform: translateY(-1px); }
@@ -81,6 +116,53 @@
         .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
         .action-group { display: flex; gap: 8px; }
         .action-group button { flex: 1; margin: 0; }
+        /* Random Slot Picker panel */
+        .random-slot-panel { text-align: center; }
+        .random-slot-buttons { display: flex; gap: 8px; margin-top: 12px; }
+        .random-slot-buttons button { flex: 1; margin-bottom: 0; }
+        .spin-animation-area { min-height: 150px; margin: 10px 0; display: flex; align-items: center; justify-content: center; }
+        /* Larger spinning image */
+        #randomSlotResultImg { width: 120px; height: 168px; object-fit: contain; border-radius: 16px; background: #1e293b; transition: transform 0.1s linear, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        /* Top providers - CSS Grid wraps into 3-5 rows */
+        .top-providers {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, auto));
+            gap: 6px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .top-providers button {
+            background: linear-gradient(135deg, #19C6FD, #3b82f6);
+            padding: 6px 4px;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            width: auto;
+            margin: 0;
+            border-radius: 40px;
+            transition: all 0.1s;
+            white-space: normal;
+            word-break: break-word;
+            cursor: pointer;
+            text-align: center;
+            border: none;
+            color: white;
+        }
+        .top-providers button.active {
+            background: linear-gradient(135deg, #ffcc00, #e6b800);
+            color: #0f172a;
+            box-shadow: 0 0 6px #ffcc00;
+        }
+        .top-providers button.all-providers {
+            background: #334155;
+        }
+        .filter-section-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 12px 0 8px 0;
+            color: #19C6FD;
+            border-left: 3px solid #19C6FD;
+            padding-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +198,7 @@
             </div>
             <div class="panel">
                 <div class="panel-title">Provider Filters</div>
+                <div class="top-providers" id="topProvidersContainer"></div>
                 <input type="text" id="filterSearch" class="input-field" placeholder="Search providers...">
                 <div class="filter-actions">
                     <button id="selectAllBtn">Select All</button>
@@ -125,6 +208,7 @@
                 <div id="providerFilterList" class="filter-panel"></div>
             </div>
         </div>
+
         <div class="middle-column">
             <div style="display: flex; gap: 20px;">
                 <div class="panel team-panel" style="flex:1">
@@ -137,6 +221,7 @@
                 </div>
             </div>
         </div>
+
         <div class="right-column">
             <div class="panel">
                 <div class="panel-title">Select Slots</div>
@@ -160,6 +245,20 @@
                     <button id="selectSlotsBtn" style="background: linear-gradient(135deg, #f59e0b, #eab308);">Select Slots</button>
                 </div>
             </div>
+
+            <div class="panel random-slot-panel">
+                <div class="panel-title">🎲 Random Slot Picker</div>
+                <div class="spin-animation-area">
+                    <img id="randomSlotResultImg" src="" style="display: none;">
+                </div>
+                <div class="random-slot-buttons">
+                    <button id="randomForA" class="btn-secondary">🎲 Random for A</button>
+                    <button id="randomForB" class="btn-secondary">🎲 Random for B</button>
+                </div>
+                <div class="filter-actions" style="margin-top: 8px; justify-content: center;">
+                    <span style="font-size:0.7rem;">Uses provider filters above</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -178,6 +277,7 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             slotData = await res.json();
             console.log(`Loaded ${slotData.length} slots`);
+            loadFilterState();
             buildProviderFilters();
             updateSlotDropdowns();
             if (slotData.length) {
@@ -239,7 +339,11 @@
     const manualAddA = document.getElementById('manualAddA');
     const manualAddB = document.getElementById('manualAddB');
 
-    // ========== WEBSOCKET SYNC (for overlay) ==========
+    const randomForABtn = document.getElementById('randomForA');
+    const randomForBBtn = document.getElementById('randomForB');
+    const randomSlotResultImg = document.getElementById('randomSlotResultImg');
+
+    // ========== WEBSOCKET SYNC ==========
     let ws = null;
 
     function connectWebSocket() {
@@ -378,38 +482,187 @@
     }
 
     // ========== PROVIDER FILTERS ==========
+    const topProviderList = [
+        "Pragmatic Play", "Titan Gaming", "Twist Gaming", "Uppercut Gaming",
+        "BGaming", "Hacksaw Gaming", "Backseat Gaming", "Donut Gaming",
+        "Unchained", "Colorful Play", "Paperclip Gaming", "Valkyrie", "Massive Studios"
+    ];
+
+    function saveFilterState() {
+        if (!isLoggedIn) return;
+        localStorage.setItem('slotWarFilterState', JSON.stringify({
+            selectedProviders: Array.from(selectedProviders),
+            providerSearchTerm: providerSearchTerm
+        }));
+    }
+
+    function loadFilterState() {
+        const saved = localStorage.getItem('slotWarFilterState');
+        if (saved) {
+            try {
+                const s = JSON.parse(saved);
+                if (s.selectedProviders) selectedProviders = new Set(s.selectedProviders);
+                if (s.providerSearchTerm) providerSearchTerm = s.providerSearchTerm;
+                if (document.getElementById('filterSearch')) {
+                    document.getElementById('filterSearch').value = providerSearchTerm || '';
+                }
+            } catch(e) { console.warn(e); }
+        }
+    }
+
+    function toggleTopProvider(providerName) {
+        if (selectedProviders.has(providerName)) {
+            selectedProviders.delete(providerName);
+        } else {
+            selectedProviders.add(providerName);
+        }
+        renderProviderFilterList();
+        updateSlotDropdowns();
+        saveFilterState();
+        updateTopProviderButtonsHighlight();
+    }
+
+    function selectAllProviders() {
+        const allProviders = [...new Set(slotData.map(slot => slot.provider))];
+        selectedProviders.clear();
+        allProviders.forEach(p => selectedProviders.add(p));
+        renderProviderFilterList();
+        updateSlotDropdowns();
+        saveFilterState();
+        updateTopProviderButtonsHighlight();
+    }
+
+    function updateTopProviderButtonsHighlight() {
+        const container = document.getElementById('topProvidersContainer');
+        if (!container) return;
+        const buttons = container.querySelectorAll('.top-provider-btn');
+        buttons.forEach(btn => {
+            const prov = btn.getAttribute('data-provider');
+            if (selectedProviders.has(prov)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
     function buildProviderFilters() {
         let providers = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
-        selectedProviders.clear();
-        providers.forEach(p => selectedProviders.add(p));
+        selectedProviders.forEach(p => { if (!providers.includes(p)) selectedProviders.delete(p); });
+        if (selectedProviders.size === 0) {
+            providers.forEach(p => selectedProviders.add(p));
+        }
         renderProviderFilterList();
+        buildTopProvidersButtons();
     }
+
+    function buildTopProvidersButtons() {
+        const container = document.getElementById('topProvidersContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        topProviderList.forEach(provider => {
+            const btn = document.createElement('button');
+            btn.textContent = provider;
+            btn.classList.add('top-provider-btn');
+            btn.setAttribute('data-provider', provider);
+            if (selectedProviders.has(provider)) {
+                btn.classList.add('active');
+            }
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleTopProvider(provider);
+            });
+            container.appendChild(btn);
+        });
+        const allBtn = document.createElement('button');
+        allBtn.textContent = 'All';
+        allBtn.classList.add('all-providers');
+        allBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectAllProviders();
+        });
+        container.appendChild(allBtn);
+    }
+
     function renderProviderFilterList() {
         const container = document.getElementById('providerFilterList');
         if (!container) return;
-        let providers = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
+        const allProviders = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
+        let filtered = allProviders;
         if (providerSearchTerm) {
-            providers = providers.filter(p => p.toLowerCase().includes(providerSearchTerm.toLowerCase()));
+            filtered = filtered.filter(p => p.toLowerCase().includes(providerSearchTerm.toLowerCase()));
         }
+        const topProviders = filtered.filter(p => topProviderList.includes(p));
+        const otherProviders = filtered.filter(p => !topProviderList.includes(p));
+
         container.innerHTML = '';
-        providers.forEach(provider => {
-            const div = document.createElement('div');
-            div.className = 'filter-provider';
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.checked = selectedProviders.has(provider);
-            cb.addEventListener('change', (e) => {
-                if (cb.checked) selectedProviders.add(provider);
-                else selectedProviders.delete(provider);
-                updateSlotDropdowns();
+
+        if (topProviders.length > 0) {
+            const topTitle = document.createElement('div');
+            topTitle.className = 'filter-section-title';
+            topTitle.textContent = '⭐ Top Providers';
+            container.appendChild(topTitle);
+            topProviders.forEach(provider => {
+                const slotCount = slotData.filter(slot => slot.provider === provider).length;
+                const div = document.createElement('div');
+                div.className = 'filter-provider';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = selectedProviders.has(provider);
+                cb.addEventListener('change', (e) => {
+                    if (cb.checked) selectedProviders.add(provider);
+                    else selectedProviders.delete(provider);
+                    renderProviderFilterList();
+                    updateSlotDropdowns();
+                    saveFilterState();
+                    updateTopProviderButtonsHighlight();
+                });
+                const label = document.createElement('label');
+                label.textContent = `${provider} (${slotCount})`;
+                div.appendChild(cb);
+                div.appendChild(label);
+                container.appendChild(div);
             });
-            const label = document.createElement('label');
-            label.textContent = provider;
-            div.appendChild(cb);
-            div.appendChild(label);
-            container.appendChild(div);
-        });
+        }
+
+        if (otherProviders.length > 0) {
+            const otherTitle = document.createElement('div');
+            otherTitle.className = 'filter-section-title';
+            otherTitle.textContent = '📋 Other Providers';
+            container.appendChild(otherTitle);
+            otherProviders.forEach(provider => {
+                const slotCount = slotData.filter(slot => slot.provider === provider).length;
+                const div = document.createElement('div');
+                div.className = 'filter-provider';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = selectedProviders.has(provider);
+                cb.addEventListener('change', (e) => {
+                    if (cb.checked) selectedProviders.add(provider);
+                    else selectedProviders.delete(provider);
+                    renderProviderFilterList();
+                    updateSlotDropdowns();
+                    saveFilterState();
+                    updateTopProviderButtonsHighlight();
+                });
+                const label = document.createElement('label');
+                label.textContent = `${provider} (${slotCount})`;
+                div.appendChild(cb);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        if (filtered.length === 0) {
+            const empty = document.createElement('div');
+            empty.textContent = 'No providers match your search';
+            empty.style.color = '#aaa';
+            empty.style.padding = '12px';
+            empty.style.textAlign = 'center';
+            container.appendChild(empty);
+        }
     }
+
     function updateSlotDropdowns() {
         if (!slotData.length) return;
         let filteredSlots = slotData.filter(slot => selectedProviders.has(slot.provider));
@@ -451,20 +704,26 @@
         updateSlotNameDisplay();
         sendSlotsToServer();
     }
+
     document.getElementById('filterSearch')?.addEventListener('input', (e) => {
         providerSearchTerm = e.target.value;
         renderProviderFilterList();
+        saveFilterState();
     });
     document.getElementById('selectAllBtn')?.addEventListener('click', () => {
         const providers = [...new Set(slotData.map(slot => slot.provider))];
         providers.forEach(p => selectedProviders.add(p));
         renderProviderFilterList();
         updateSlotDropdowns();
+        saveFilterState();
+        updateTopProviderButtonsHighlight();
     });
     document.getElementById('deselectAllBtn')?.addEventListener('click', () => {
         selectedProviders.clear();
         renderProviderFilterList();
         updateSlotDropdowns();
+        saveFilterState();
+        updateTopProviderButtonsHighlight();
     });
     document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
         providerSearchTerm = '';
@@ -473,33 +732,39 @@
         providers.forEach(p => selectedProviders.add(p));
         renderProviderFilterList();
         updateSlotDropdowns();
+        saveFilterState();
+        updateTopProviderButtonsHighlight();
     });
+
     function updateSlotPreview(team, slot) {
         const previewDiv = team === 'A' ? slotAPreview : slotBPreview;
         if (!slot) {
             previewDiv.innerHTML = '';
             return;
         }
-        previewDiv.innerHTML = `<img src="${slot.image_url}" style="width:110px;height:154px;object-fit:contain;border-radius:12px;">`;
+        previewDiv.innerHTML = `<img src="${slot.image_url}" style="width:140px;height:196px;object-fit:contain;border-radius:16px;">`;
         updateSlotNameDisplay();
     }
+
     function updateSlotNameDisplay() {
         if (selectedSlotA) {
-            slotAName.innerHTML = `<div style="font-size:0.85rem;margin-top:5px;text-align:center;">${escapeHtml(selectedSlotA.name)}</div>`;
+            slotAName.innerHTML = `<div style="font-size:1rem;margin-top:8px;text-align:center;font-weight:600;">${escapeHtml(selectedSlotA.name)}</div>`;
         } else {
             slotAName.innerHTML = '';
         }
         if (selectedSlotB) {
-            slotBName.innerHTML = `<div style="font-size:0.85rem;margin-top:5px;text-align:center;">${escapeHtml(selectedSlotB.name)}</div>`;
+            slotBName.innerHTML = `<div style="font-size:1rem;margin-top:8px;text-align:center;font-weight:600;">${escapeHtml(selectedSlotB.name)}</div>`;
         } else {
             slotBName.innerHTML = '';
         }
     }
+
     function getSelectedSlot(team) {
         const select = team === 'A' ? slotASelect : slotBSelect;
         const name = select.value;
         return slotData.find(s => s.name === name);
     }
+
     slotASelect.addEventListener('change', () => {
         selectedSlotA = getSelectedSlot('A');
         updateSlotPreview('A', selectedSlotA);
@@ -513,7 +778,7 @@
         sendSlotsToServer();
     });
 
-    // ========== WHEEL ==========
+    // ========== WHEEL (with random stop offset) ==========
     function showWheelOverlay(team, addPoints = false) {
         const teamMembers = participants.filter(p => p.team === team);
         if (teamMembers.length === 0) {
@@ -564,8 +829,12 @@
             }
         }
         if (targetIdx === -1) targetIdx = 0;
-        const targetOffset = -(targetIdx * itemHeight) + centerOffset;
-        const duration = 7 + Math.random() * 3;
+        const randomOffset = (Math.random() - 0.5) * itemHeight * 0.8;
+        let targetOffset = -(targetIdx * itemHeight) + centerOffset + randomOffset;
+        const maxOffset = -(0 * itemHeight) + centerOffset;
+        const minOffset = -((totalItems-1) * itemHeight) + centerOffset;
+        targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
+        const duration = 6 + Math.random() * 5;
         scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
         scroller.style.transform = `translateY(${targetOffset}px)`;
         const resultDiv = document.getElementById('wheelResult');
@@ -594,6 +863,7 @@
         document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
         return true;
     }
+
     function playWinSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -608,6 +878,7 @@
             o.start(now); o.stop(now + 0.5);
         } catch(e) {}
     }
+
     function shootConfettiPiece() {
         const c = document.createElement('div');
         c.className = 'confetti-piece';
@@ -616,6 +887,7 @@
         c.animate([{ transform: 'translateY(0px) rotate(0deg)', opacity: 1 }, { transform: `translateY(${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1500 }).onfinish = () => c.remove();
     }
     function shootConfetti() { for (let i = 0; i < 80; i++) setTimeout(shootConfettiPiece, i * 15); }
+
     function showWinnerOverlay(winnerName, team, slot) {
         if (currentWinnerOverlay) currentWinnerOverlay.remove();
         const overlay = document.createElement('div');
@@ -656,6 +928,84 @@
         }
     });
 
+    // ========== RANDOM SLOT PICKER (longer & better animation) ==========
+    let isSpinning = false;
+    let spinInterval = null;
+
+    function getFilteredSlots() {
+        return slotData.filter(slot => selectedProviders.has(slot.provider));
+    }
+
+    function startSpinAnimation(team) {
+        if (isSpinning) return;
+        const filtered = getFilteredSlots();
+        if (filtered.length === 0) {
+            gameMessageSpan.innerText = '❌ No slots match the selected filters';
+            return;
+        }
+
+        isSpinning = true;
+        const targetButton = team === 'A' ? randomForABtn : randomForBBtn;
+        targetButton.disabled = true;
+        randomForABtn.disabled = true;
+        randomForBBtn.disabled = true;
+
+        let frames = 0;
+        const totalFrames = 30;          // more frames = longer animation (30 frames)
+        const frameDelay = 80;           // 80ms each = 2.4 seconds total
+        const randomIndex = Math.floor(Math.random() * filtered.length);
+        const chosenSlot = filtered[randomIndex];
+
+        randomSlotResultImg.style.display = 'block';
+        // Add a pulsing scale effect
+        randomSlotResultImg.style.transition = 'transform 0.1s linear';
+        spinInterval = setInterval(() => {
+            if (frames >= totalFrames) {
+                clearInterval(spinInterval);
+                isSpinning = false;
+                randomForABtn.disabled = false;
+                randomForBBtn.disabled = false;
+                targetButton.disabled = false;
+
+                if (team === 'A') {
+                    selectedSlotA = chosenSlot;
+                    updateSlotPreview('A', selectedSlotA);
+                    slotASelect.value = chosenSlot.name;
+                    updateSlotNameDisplay();
+                    sendSlotsToServer();
+                    gameMessageSpan.innerText = `🎲 Random slot for Team A: ${chosenSlot.name}`;
+                } else {
+                    selectedSlotB = chosenSlot;
+                    updateSlotPreview('B', selectedSlotB);
+                    slotBSelect.value = chosenSlot.name;
+                    updateSlotNameDisplay();
+                    sendSlotsToServer();
+                    gameMessageSpan.innerText = `🎲 Random slot for Team B: ${chosenSlot.name}`;
+                }
+                randomSlotResultImg.src = chosenSlot.image_url;
+                randomSlotResultImg.style.transform = 'rotateY(0deg) scale(1)';
+                randomSlotResultImg.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+                // Add a bounce effect at the end
+                randomSlotResultImg.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    randomSlotResultImg.style.transform = 'scale(1)';
+                }, 200);
+                return;
+            }
+
+            const tempSlot = filtered[Math.floor(Math.random() * filtered.length)];
+            randomSlotResultImg.src = tempSlot.image_url;
+            // Spin rotation: increase rotation angle each frame, add slight scale pulse
+            const rotation = frames * 22;
+            const scale = 1 + Math.sin(frames * 0.8) * 0.05; // subtle pulse
+            randomSlotResultImg.style.transform = `rotateY(${rotation}deg) scale(${scale})`;
+            frames++;
+        }, frameDelay);
+    }
+
+    randomForABtn.addEventListener('click', () => startSpinAnimation('A'));
+    randomForBBtn.addEventListener('click', () => startSpinAnimation('B'));
+
     // ========== CHAT CONNECTION ==========
     async function resolveKickChatroomId(channelName) {
         try {
@@ -670,6 +1020,7 @@
             throw new Error('Unable to resolve Kick chatroom ID');
         }
     }
+
     function stopKickBrowserChat() {
         if (reconnectTimer) clearTimeout(reconnectTimer);
         reconnectAttempt = 0;
@@ -678,6 +1029,7 @@
             kickBrowserSocket = null;
         }
     }
+
     async function startKickBrowserChat(channelName) {
         stopKickBrowserChat();
         if (manualDisconnect) return;
@@ -729,17 +1081,21 @@
             gameMessageSpan.innerText = err.message;
         }
     }
+
     function setConnectionStatus(message, status) {
         statusDisplay.innerHTML = message;
         statusDisplay.className = 'connection-status';
     }
+
     function saveState() {
         if (!isLoggedIn) return;
         localStorage.setItem('slotWarState', JSON.stringify({
             participants, joiningOpen, selectedSlotA: selectedSlotA?.name, selectedSlotB: selectedSlotB?.name,
             kickToken, currentChannel, isLoggedIn, joinedUsers: Array.from(joinedUsers)
         }));
+        saveFilterState();
     }
+
     function loadState() {
         const saved = localStorage.getItem('slotWarState');
         if (!saved) return;
@@ -771,7 +1127,7 @@
             sendSlotsToServer();
         } catch(e) { console.warn(e); }
     }
-    
+
     // ========== MANUAL ADD HANDLERS ==========
     manualAddA.addEventListener('click', () => {
         let name = manualUsername.value.trim();
@@ -885,7 +1241,6 @@
         window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
     }
 
-    // Standalone login (only if not in iframe)
     if (!isIframe) {
         loginBtn.addEventListener('click', () => {
             if (isLoggedIn) {
@@ -943,7 +1298,6 @@
         saveState();
     });
 
-    // Start everything
     connectWebSocket();
     loadSlotData().then(() => {
         loadState();
@@ -961,7 +1315,6 @@
         }
     }, 5000);
 
-    // Hide own kick panel when inside iframe
     if (isIframe) {
         const kickPanel = document.getElementById('kickPanel');
         if (kickPanel) kickPanel.style.display = 'none';
