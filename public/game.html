@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Ace Race — Kick Giveaway Game</title>
+    <title>Ace Race — Kick Giveaway Game (Winner History + Multi‑Channel)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        /* (full original Ace Race CSS – too long to repeat but keep yours) */
+        /* ========== ORIGINAL CSS (unchanged) ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(25, 198, 253, 0.15), transparent), radial-gradient(ellipse 60% 80% at 80% 60%, rgba(6, 93, 230, 0.1), transparent), #0a0c12; min-height: 100vh; padding: 24px; color: #e2e8f0; }
         .game-container { max-width: 1600px; margin: 0 auto; background: rgba(10, 14, 23, 0.6); backdrop-filter: blur(12px); border-radius: 48px; padding: 24px 28px; border: 1px solid rgba(25, 198, 253, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
@@ -76,14 +76,12 @@
         .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
         .turn-indicator, .deck-status { background: rgba(0,0,0,0.5); border-radius: 60px; padding: 8px 16px; text-align: center; margin: 10px auto; width: fit-content; font-weight: 500; color: #cbd5e1; }
         .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; }
-        .winner-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 48px; padding: 40px 60px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 2px solid #19C6FD; max-width: 600px; width: 90%; cursor: default; color: #f1f5f9; font-family: 'Poppins', sans-serif; }
+        .winner-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 48px; padding: 40px 60px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 2px solid #19C6FD; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; cursor: default; color: #f1f5f9; font-family: 'Poppins', sans-serif; }
         .winner-card h1 { font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .winner-card .winner-name { font-size: 2.8rem; font-weight: 800; margin: 20px 0; text-shadow: 0 0 10px #19C6FD, 0 0 20px #3b82f6; animation: flicker 2s infinite; font-family: 'Orbitron', monospace; word-break: break-word; line-height: 1.2; text-align: center; }
         @keyframes flicker { 0%, 100% { text-shadow: 0 0 10px #19C6FD, 0 0 20px #3b82f6; } 50% { text-shadow: 0 0 30px #19C6FD, 0 0 15px #3b82f6; } }
-        .winner-chat-log { background: rgba(0,0,0,0.5); border-radius: 24px; padding: 15px; margin: 20px 0; max-height: 200px; overflow-y: auto; text-align: left; font-family: monospace; font-size: 0.9rem; color: #cbd5e1; }
+        .winner-chat-log { background: rgba(0,0,0,0.6); border-radius: 24px; padding: 15px; margin: 20px 0; max-height: 300px; overflow-y: auto; text-align: left; font-family: monospace; font-size: 0.85rem; color: #cbd5e1; border: 1px solid rgba(25,198,253,0.3); }
         .winner-chat-log div { padding: 6px 0; border-bottom: 1px solid #334155; }
-        .winner-card button { padding: 12px 32px; border-radius: 60px; background: linear-gradient(135deg, #19C6FD, #3b82f6); border: none; font-weight: 700; font-size: 1.2rem; cursor: pointer; color: #0f172a; transition: 0.2s; }
-        .winner-card button:hover { transform: scale(1.05); }
         .confetti-piece { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 9999; animation: confettiFall 1.5s ease-out forwards; }
         @keyframes confettiFall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
         .wheel-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 20000; cursor: default; }
@@ -149,6 +147,24 @@
         .toggle-group button { flex: 1; margin-bottom: 0; }
         .toggle-group .btn-success.joining-open { box-shadow: 0 0 12px #22c55e; border: 1px solid #22c55e; }
         .toggle-group .btn-danger.joining-closed { box-shadow: 0 0 12px #dc2626; border: 1px solid #dc2626; }
+        .chat-log-panel, .history-panel {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 12px;
+            margin-top: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+        .chat-log-panel div, .history-panel div {
+            padding: 4px 0;
+            border-bottom: 1px solid #334155;
+            color: #cbd5e1;
+        }
+        .history-panel .winner-entry {
+            color: #fbbf24;
+        }
     </style>
 </head>
 <body>
@@ -199,6 +215,14 @@
                     <button id="joinBtn" class="btn-blue">Join</button>
                 </div>
             </div>
+            <div class="panel">
+                <div class="panel-title">📜 Stream Chat Log</div>
+                <div id="chatLogPanel" class="chat-log-panel">Waiting for messages...</div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">🏆 Last 20 Winners</div>
+                <div id="winnerHistoryPanel" class="history-panel">No winners yet</div>
+            </div>
         </div>
         <div class="middle-column">
             <div class="panel">
@@ -248,6 +272,70 @@
 </div>
 
 <script>
+    // ========== MULTI-CHANNEL SUPPORT ==========
+    let currentChannelKey = '';
+    function getStorageKey(base) {
+        return currentChannelKey ? `${base}_${currentChannelKey}` : base;
+    }
+
+    // ========== GLOBAL CHAT LOG & WINNER HISTORY ==========
+    let fullChatLog = [];
+    let winnerHistory = [];
+    const MAX_CHAT_LOG = 200;
+    const MAX_WINNERS = 20;
+
+    function addChatMessage(username, message) {
+        const timestamp = new Date().toLocaleTimeString();
+        fullChatLog.unshift({ username, message, timestamp });
+        if (fullChatLog.length > MAX_CHAT_LOG) fullChatLog.pop();
+        updateChatLogPanel();
+
+        // Live update for winner overlay
+        if (currentWinnerOverlay && currentWinnerName && username.toLowerCase() === currentWinnerName.toLowerCase()) {
+            const mainChatDiv = currentWinnerOverlay.querySelector('.winner-main-chat');
+            if (mainChatDiv) {
+                const newMsgDiv = document.createElement('div');
+                newMsgDiv.innerHTML = `[${timestamp}] ${escapeHtml(message)}`;
+                mainChatDiv.appendChild(newMsgDiv);
+                mainChatDiv.scrollTop = mainChatDiv.scrollHeight;
+            }
+        }
+    }
+
+    function updateChatLogPanel() {
+        const panel = document.getElementById('chatLogPanel');
+        if (!panel) return;
+        if (fullChatLog.length === 0) {
+            panel.innerHTML = 'Waiting for messages...';
+            return;
+        }
+        panel.innerHTML = fullChatLog.map(entry => 
+            `<div>[${entry.timestamp}] <strong>${escapeHtml(entry.username)}</strong>: ${escapeHtml(entry.message)}</div>`
+        ).join('');
+        panel.scrollTop = 0;
+    }
+
+    function addWinnerToHistory(winnerName, winReason) {
+        const timestamp = new Date().toLocaleString();
+        winnerHistory.unshift({ timestamp, winnerName, winReason });
+        if (winnerHistory.length > MAX_WINNERS) winnerHistory.pop();
+        updateWinnerHistoryPanel();
+        saveState();
+    }
+
+    function updateWinnerHistoryPanel() {
+        const panel = document.getElementById('winnerHistoryPanel');
+        if (!panel) return;
+        if (winnerHistory.length === 0) {
+            panel.innerHTML = 'No winners yet';
+            return;
+        }
+        panel.innerHTML = winnerHistory.map(entry => 
+            `<div class="winner-entry">🏆 [${entry.timestamp}] ${escapeHtml(entry.winnerName)} – ${entry.winReason}</div>`
+        ).join('');
+        panel.scrollTop = 0;
+    }
+
     // ========== CARD ASSETS ==========
     const CARD_ASSET_PATH = "/assets/cards/";
     const CARD_EXT = ".png";
@@ -490,18 +578,19 @@
 
     // ========== PERSISTENCE ==========
     function saveState() {
-        if (!isLoggedIn) return;
-        localStorage.setItem('aceRaceState', JSON.stringify({
+        if (!isLoggedIn || !currentChannel) return;
+        localStorage.setItem(getStorageKey('aceRaceState'), JSON.stringify({
             participants: participants.map(p => ({ name: p.name, id: p.id, lastSeen: p.lastSeen })),
             selectedPlayer1: selectedPlayer1 ? { name: selectedPlayer1.name, id: selectedPlayer1.id } : null,
             selectedPlayer2: selectedPlayer2 ? { name: selectedPlayer2.name, id: selectedPlayer2.id } : null,
             currentMode, keyword, inactivityMinutes, kickToken, currentChannel, isLoggedIn,
-            presetWinEnabled, presetCardCode, playerPicksCard, joiningOpen
+            presetWinEnabled, presetCardCode, playerPicksCard, joiningOpen,
+            winnerHistory
         }));
     }
 
     function loadState() {
-        const saved = localStorage.getItem('aceRaceState');
+        const saved = localStorage.getItem(getStorageKey('aceRaceState'));
         if (!saved) return;
         try {
             const s = JSON.parse(saved);
@@ -514,11 +603,14 @@
             inactivityMinutes = s.inactivityMinutes || 1;
             kickToken = s.kickToken;
             currentChannel = s.currentChannel;
+            currentChannelKey = currentChannel;
             isLoggedIn = s.isLoggedIn;
             if (s.presetWinEnabled !== undefined) presetWinEnabled = s.presetWinEnabled;
             if (s.presetCardCode) presetCardCode = s.presetCardCode;
             if (s.playerPicksCard !== undefined) playerPicksCard = s.playerPicksCard;
             if (s.joiningOpen !== undefined) joiningOpen = s.joiningOpen;
+            if (s.winnerHistory) winnerHistory = s.winnerHistory;
+            updateWinnerHistoryPanel();
             if (currentChannel) channelNameInput.value = currentChannel;
             modeIndicator.innerText = keyword;
             keywordInput.value = keyword;
@@ -583,9 +675,15 @@
         lastConnectedChannel = null;
     }
 
+    // FIXED: Always log messages, but joining only when open
     function handleChatMessage(username, content) {
-        if (!joiningOpen) return;
         if (!username || !content) return;
+        // Always log chat messages for history
+        addChatMessage(username, content);
+        
+        // Only process joining if open
+        if (!joiningOpen) return;
+        
         const kl = keyword.toLowerCase();
         if (currentMode === 'keyword') {
             if (kl === '' || content.toLowerCase() === kl || content.toLowerCase().startsWith(kl + ' ')) addParticipant(username);
@@ -594,11 +692,9 @@
             else updateParticipantSeen(username);
         }
         if (window._readyCheckCallback) window._readyCheckCallback(username, content);
-        if (currentWinnerOverlay && currentWinnerName === username) addLiveWinnerMessage(username, content);
     }
 
     async function startKickBrowserChat(channelName) {
-        // Already connected to the same channel with open socket?
         if (kickBrowserSocket && kickBrowserSocket.readyState === WebSocket.OPEN && currentChannel === channelName) {
             console.log('Already connected to', channelName);
             return;
@@ -653,6 +749,7 @@
             });
             kickBrowserSocket = wsChat;
             currentChannel = channelName;
+            currentChannelKey = channelName;
             saveState();
         } catch (err) {
             setConnectionStatus(`❌ ${err.message}`, 'failed');
@@ -670,7 +767,9 @@
         if (!isLoggedIn) { gameMessageSpan.innerText = 'Please log in first.'; return; }
         const channel = channelNameInput.value.trim();
         if (!channel) { gameMessageSpan.innerText = 'Enter a channel name.'; return; }
-        currentChannel = channel; manualDisconnect = false;
+        currentChannel = channel;
+        currentChannelKey = channel;
+        manualDisconnect = false;
         startKickBrowserChat(currentChannel); saveState();
     });
 
@@ -759,36 +858,6 @@
     }
 
     // ========== WINNER ==========
-    function addLiveWinnerMessage(sender, message) {
-        if (!currentWinnerOverlay || sender !== currentWinnerName) return;
-        const logDiv = currentWinnerOverlay.querySelector('#winnerLiveChatLog');
-        if (!logDiv) return;
-        const placeholder = logDiv.querySelector('.winner-placeholder');
-        if (placeholder) placeholder.remove();
-        const div = document.createElement('div');
-        div.innerHTML = `${new Date().toLocaleTimeString()} : ${escapeHtml(message)}`;
-        logDiv.appendChild(div); logDiv.scrollTop = logDiv.scrollHeight;
-    }
-
-    function showWinnerOverlay(winnerName, winnerMessages) {
-        if (currentWinnerOverlay) currentWinnerOverlay.remove();
-        const overlay = document.createElement('div');
-        overlay.className = 'winner-overlay';
-        const msgs = (winnerMessages && winnerMessages.length) ? winnerMessages.map(m => `<div>${m.timestamp} : ${escapeHtml(m.message)}</div>`).join('') : '<div class="winner-placeholder">No messages yet...</div>';
-        overlay.innerHTML = `
-            <div class="winner-card">
-                <h1>🏆 WINNER! 🏆</h1>
-                <div class="winner-name">${escapeHtml(winnerName)}</div>
-                <div class="winner-chat-log" id="winnerLiveChatLog"><strong>📨 Live winner chat:</strong>${msgs}</div>
-                <button id="closeWinnerBtn">Continue</button>
-            </div>`;
-        document.body.appendChild(overlay);
-        currentWinnerOverlay = overlay; currentWinnerName = winnerName;
-        const close = () => { overlay.remove(); currentWinnerOverlay = null; currentWinnerName = null; };
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-        $('closeWinnerBtn').addEventListener('click', close);
-    }
-
     function shootConfettiPiece() {
         const c = document.createElement('div'); c.className = 'confetti-piece';
         c.style.cssText = `left:${Math.random()*window.innerWidth}px;top:-20px;background:hsl(${Math.random()*360},80%,60%);width:${Math.random()*10+4}px;height:${Math.random()*10+4}px;border-radius:${Math.random()>.5?'50%':'0'}`;
@@ -796,6 +865,38 @@
         c.animate([{ transform: 'translateY(0px) rotate(0deg)', opacity: 1 }, { transform: `translateY(${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1500 + Math.random() * 1000, easing: 'cubic-bezier(0.2,0.9,0.4,1)' }).onfinish = () => c.remove();
     }
     function shootConfetti() { for (let i = 0; i < 100; i++) setTimeout(shootConfettiPiece, i * 15); }
+
+    // ========== WINNER OVERLAY (only winner's chat, no ready-check messages) ==========
+    function showWinnerOverlay(winnerName, winnerMessages) {
+        if (currentWinnerOverlay) currentWinnerOverlay.remove();
+
+        // Get winner's own messages from history (old messages)
+        const winnersOwnChat = fullChatLog
+            .filter(entry => entry.username.toLowerCase() === winnerName.toLowerCase())
+            .slice(0, 30)
+            .map(entry => `<div>[${entry.timestamp}] ${escapeHtml(entry.message)}</div>`)
+            .join('');
+        const chatLogHtml = winnersOwnChat.length ? winnersOwnChat : '<div>No recent messages from this winner in the chat log.</div>';
+
+        const overlay = document.createElement('div');
+        overlay.className = 'winner-overlay';
+        overlay.innerHTML = `
+            <div class="winner-card">
+                <h1>🏆 WINNER! 🏆</h1>
+                <div class="winner-name">${escapeHtml(winnerName)}</div>
+                <div class="winner-chat-log">
+                    <strong>📝 ${escapeHtml(winnerName)}'s chat messages (last 30)</strong>
+                    <div class="winner-main-chat" style="margin-top: 10px;">${chatLogHtml}</div>
+                </div>
+                <button id="closeWinnerBtn" style="margin-top:20px;padding:12px 32px;border-radius:60px;background:#19C6FD;border:none;font-weight:700;cursor:pointer;">Continue</button>
+            </div>`;
+        document.body.appendChild(overlay);
+        currentWinnerOverlay = overlay;
+        currentWinnerName = winnerName;
+        const close = () => { overlay.remove(); currentWinnerOverlay = null; currentWinnerName = null; };
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        document.getElementById('closeWinnerBtn').addEventListener('click', close);
+    }
 
     // ========== PARTICIPANTS ==========
     function addParticipant(username, timestamp) {
@@ -902,29 +1003,51 @@
 
     // ========== WHEEL SELECTOR ==========
     function showWheelSelector() {
-        if (participants.length < 2) { gameMessageSpan.innerText = "Need at least 2 participants"; return false; }
+        if (participants.length < 2) {
+            gameMessageSpan.innerText = "Need at least 2 participants";
+            return false;
+        }
         const overlay = document.createElement('div');
         overlay.className = 'wheel-overlay';
-        overlay.innerHTML = `<div class="wheel-container"><div class="wheel-title">⚡ Selecting Duelists ⚡</div><div class="wheels"><div class="wheel"><div class="wheel-label">Player 1</div><div class="wheel-viewport"><div id="wheel1Scroller" class="wheel-scroller"></div><div class="wheel-pointer"></div></div></div><div class="wheel"><div class="wheel-label">Player 2</div><div class="wheel-viewport"><div id="wheel2Scroller" class="wheel-scroller"></div><div class="wheel-pointer"></div></div></div></div></div>`;
+        overlay.innerHTML = `
+            <div class="wheel-container">
+                <div class="wheel-title">⚡ Selecting Duelists ⚡</div>
+                <div class="wheels">
+                    <div class="wheel">
+                        <div class="wheel-label">Player 1</div>
+                        <div class="wheel-viewport">
+                            <div id="wheel1Scroller" class="wheel-scroller"></div>
+                            <div class="wheel-pointer"></div>
+                        </div>
+                    </div>
+                    <div class="wheel">
+                        <div class="wheel-label">Player 2</div>
+                        <div class="wheel-viewport">
+                            <div id="wheel2Scroller" class="wheel-scroller"></div>
+                            <div class="wheel-pointer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         document.body.appendChild(overlay);
         const names = participants.map(p => p.name);
         const repeatFactor = 100;
         let repeated = [];
         for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
-        const w1 = $('wheel1Scroller'), w2 = $('wheel2Scroller');
+        const w1 = document.getElementById('wheel1Scroller');
+        const w2 = document.getElementById('wheel2Scroller');
         w1.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
         w2.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
         const firstItem = w1.querySelector('.wheel-item');
         const itemHeight = firstItem.getBoundingClientRect().height;
-        const viewportHeight = 120, centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+        const viewportHeight = 120;
+        const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
         const totalItems = repeated.length;
         let idx1, idx2, n1, n2;
         do { idx1 = Math.floor(Math.random() * (totalItems - 50)) + 25; idx2 = Math.floor(Math.random() * (totalItems - 50)) + 25; n1 = repeated[idx1]; n2 = repeated[idx2]; } while (n1 === n2 && participants.length > 1);
         const d1 = Math.random() * 4 + 6, d2 = Math.random() * 4 + 6;
         w1.style.transition = `transform ${d1}s cubic-bezier(0.05, 0.9, 0.2, 1)`;
         w2.style.transition = `transform ${d2}s cubic-bezier(0.05, 0.9, 0.2, 1)`;
-        w1.style.transform = 'translateY(0px)'; w2.style.transform = 'translateY(0px)';
-        void w1.offsetHeight; void w2.offsetHeight;
         w1.style.transform = `translateY(${-(idx1 * itemHeight) + centerOffset}px)`;
         w2.style.transform = `translateY(${-(idx2 * itemHeight) + centerOffset}px)`;
         playWheelSpinSound();
@@ -933,15 +1056,9 @@
             stopped++;
             if (stopped !== 2) return;
             overlay.remove();
-            const getIdx = (scroller) => {
-                const m = scroller.style.transform.match(/translateY\(([-\d.]+)px\)/);
-                if (!m) return 0;
-                return Math.min(Math.max(Math.round(-(parseFloat(m[1]) - centerOffset) / itemHeight), 0), totalItems - 1);
-            };
-            const fi1 = getIdx(w1), fi2 = getIdx(w2);
-            let p1 = participants.find(p => p.name === repeated[fi1]);
-            let p2 = participants.find(p => p.name === repeated[fi2]);
-            if (p1 === p2 && participants.length > 1) p2 = participants.filter(p => p.name !== repeated[fi1])[Math.floor(Math.random() * (participants.length - 1))];
+            let p1 = participants.find(p => p.name === repeated[idx1]);
+            let p2 = participants.find(p => p.name === repeated[idx2]);
+            if (p1 === p2 && participants.length > 1) p2 = participants.filter(p => p.name !== repeated[idx1])[Math.floor(Math.random() * (participants.length - 1))];
             selectedPlayer1 = p1; selectedPlayer2 = p2;
             updateSelectedDisplay(); renderParticipants(); resetGameVisualsOnly();
             gameMessageSpan.innerText = `Selected: ${p1.name} vs ${p2.name}`;
@@ -957,115 +1074,169 @@
 
     // ========== READY CHECK OVERLAY ==========
     function showReadyCheckOverlay(player1, player2) {
-        if (!player1 || !player2) return;
-        if (readyOverlayElement) readyOverlayElement.remove();
-        readyCheckPlayers = [player1, player2];
-        readyStatus = [false, false];
-        readyMessageLogs = [[], []];
+    if (!player1 || !player2) return;
+    if (readyOverlayElement) readyOverlayElement.remove();
+    readyCheckPlayers = [player1, player2];
+    readyStatus = [false, false];
+    readyMessageLogs = [[], []];
+    if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
+    if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
+    readyCheckActive = true;
+
+    // Get old messages for each player from fullChatLog
+    function getPlayerOldMessages(playerName) {
+        return fullChatLog
+            .filter(entry => entry.username.toLowerCase() === playerName.toLowerCase())
+            .slice(0, 30)
+            .map(entry => `<div>[${entry.timestamp}] ${escapeHtml(entry.message)}</div>`)
+            .join('');
+    }
+
+    const oldMessages0 = getPlayerOldMessages(player1.name);
+    const oldMessages1 = getPlayerOldMessages(player2.name);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'ready-overlay';
+    overlay.innerHTML = `
+        <div class="ready-container">
+            <div class="ready-title">⚡ Ready Check ⚡</div>
+            <div class="ready-players">
+                <div class="ready-player-card" data-player="0">
+                    <div class="ready-player-name">${escapeHtml(readyCheckPlayers[0].name)}</div>
+                    <div id="readyStatus0" class="ready-status waiting">⏳ Waiting for message...</div>
+                    <div class="timer-bar-container"><div id="timerBar0" class="timer-bar" style="width:100%"></div></div>
+                    <div id="readyTimer0" class="ready-timer">30s left</div>
+                    <div class="ready-chat-log" id="readyLog0">
+                        <strong>📝 ${escapeHtml(player1.name)}'s messages</strong>
+                        <div class="ready-messages-container0" style="margin-top:5px;">${oldMessages0 || '<div>No recent messages</div>'}</div>
+                    </div>
+                    <button id="replaceBtn0" class="ready-replace-btn">🔄 Replace Player</button>
+                </div>
+                <div class="ready-player-card" data-player="1">
+                    <div class="ready-player-name">${escapeHtml(readyCheckPlayers[1].name)}</div>
+                    <div id="readyStatus1" class="ready-status waiting">⏳ Waiting for message...</div>
+                    <div class="timer-bar-container"><div id="timerBar1" class="timer-bar" style="width:100%"></div></div>
+                    <div id="readyTimer1" class="ready-timer">30s left</div>
+                    <div class="ready-chat-log" id="readyLog1">
+                        <strong>📝 ${escapeHtml(player2.name)}'s messages</strong>
+                        <div class="ready-messages-container1" style="margin-top:5px;">${oldMessages1 || '<div>No recent messages</div>'}</div>
+                    </div>
+                    <button id="replaceBtn1" class="ready-replace-btn">🔄 Replace Player</button>
+                </div>
+            </div>
+            <div class="ready-start-battle" style="display:flex;gap:15px;justify-content:center;">
+                <button id="forceStartBtn">Start Anyway</button>
+                <button id="startBattleBtn" style="display:none;">Start Battle</button>
+            </div>
+            <div class="ready-cancel"><button id="cancelReadyBtn">Cancel</button></div>
+        </div>`;
+    document.body.appendChild(overlay);
+    readyOverlayElement = overlay;
+
+    // Store container references for live updates
+    const msgContainers = [
+        overlay.querySelector('.ready-messages-container0'),
+        overlay.querySelector('.ready-messages-container1')
+    ];
+
+    // Timer logic
+    function startTimer(idx, secs) {
+        secs = secs || 30; let left = secs;
+        const te = $(`readyTimer${idx}`), be = $(`timerBar${idx}`);
+        const iv = setInterval(() => {
+            if (!readyCheckActive) { clearInterval(iv); return; }
+            if (readyStatus[idx]) { clearInterval(iv); be.style.width = '100%'; te.textContent = '✅ Ready!'; return; }
+            left--; te.textContent = `${left}s left`;
+            be.style.width = `${Math.max(0, (left / secs) * 100)}%`;
+            if (left <= 0) { clearInterval(iv); te.textContent = 'Expired'; be.style.width = '0%'; }
+        }, 1000);
+        readyTimerIntervals[idx] = iv;
+    }
+    startTimer(0); startTimer(1);
+
+    // Replace player logic
+    function replacePlayer(idx) {
+        if (!readyCheckActive) return;
+        const avail = participants.filter(p => !readyCheckPlayers.map(x => x.name.toLowerCase()).includes(p.name.toLowerCase()));
+        if (!avail.length) return;
+        const newPlayer = avail[Math.floor(Math.random() * avail.length)];
+        readyCheckPlayers[idx] = newPlayer;
+        readyStatus[idx] = false;
+        readyMessageLogs[idx] = [];
+        const card = overlay.querySelector(`.ready-player-card[data-player="${idx}"]`);
+        card.querySelector('.ready-player-name').innerHTML = escapeHtml(newPlayer.name);
+        const se = $(`readyStatus${idx}`); se.className = 'ready-status waiting'; se.textContent = '⏳ Waiting for message...';
+        // Load old messages for the new player
+        const oldMsgs = fullChatLog.filter(e => e.username.toLowerCase() === newPlayer.name.toLowerCase())
+            .slice(0,30).map(e => `<div>[${e.timestamp}] ${escapeHtml(e.message)}</div>`).join('');
+        msgContainers[idx].innerHTML = oldMsgs || '<div>No recent messages</div>';
+        if (readyTimerIntervals[idx]) clearInterval(readyTimerIntervals[idx]);
+        startTimer(idx);
+    }
+
+    $('replaceBtn0').addEventListener('click', () => replacePlayer(0));
+    $('replaceBtn1').addEventListener('click', () => replacePlayer(1));
+    $('cancelReadyBtn').addEventListener('click', () => {
+        readyCheckActive = false; overlay.remove();
         if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
         if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
-        readyCheckActive = true;
-        const overlay = document.createElement('div');
-        overlay.className = 'ready-overlay';
-        overlay.innerHTML = `
-            <div class="ready-container">
-                <div class="ready-title">⚡ Ready Check ⚡</div>
-                <div class="ready-players">
-                    <div class="ready-player-card" data-player="0"><div class="ready-player-name">${escapeHtml(readyCheckPlayers[0].name)}</div><div id="readyStatus0" class="ready-status waiting">⏳ Waiting for message...</div><div class="timer-bar-container"><div id="timerBar0" class="timer-bar" style="width:100%"></div></div><div id="readyTimer0" class="ready-timer">30s left</div><div id="readyLog0" class="ready-chat-log"></div><button id="replaceBtn0" class="ready-replace-btn">🔄 Replace Player</button></div>
-                    <div class="ready-player-card" data-player="1"><div class="ready-player-name">${escapeHtml(readyCheckPlayers[1].name)}</div><div id="readyStatus1" class="ready-status waiting">⏳ Waiting for message...</div><div class="timer-bar-container"><div id="timerBar1" class="timer-bar" style="width:100%"></div></div><div id="readyTimer1" class="ready-timer">30s left</div><div id="readyLog1" class="ready-chat-log"></div><button id="replaceBtn1" class="ready-replace-btn">🔄 Replace Player</button></div>
-                </div>
-                <div class="ready-start-battle" style="display:flex;gap:15px;justify-content:center;"><button id="forceStartBtn">Start Anyway</button><button id="startBattleBtn" style="display:none;">Start Battle</button></div>
-                <div class="ready-cancel"><button id="cancelReadyBtn">Cancel</button></div>
-            </div>`;
-        document.body.appendChild(overlay);
-        readyOverlayElement = overlay;
+    });
 
-        function startTimer(idx, secs) {
-            secs = secs || 30; let left = secs;
-            const te = $(`readyTimer${idx}`), be = $(`timerBar${idx}`);
-            const iv = setInterval(() => {
-                if (!readyCheckActive) { clearInterval(iv); return; }
-                if (readyStatus[idx]) { clearInterval(iv); be.style.width = '100%'; te.textContent = '✅ Ready!'; return; }
-                left--; te.textContent = `${left}s left`;
-                be.style.width = `${Math.max(0, (left / secs) * 100)}%`;
-                if (left <= 0) { clearInterval(iv); te.textContent = 'Expired'; be.style.width = '0%'; }
-            }, 1000);
-            readyTimerIntervals[idx] = iv;
+    const forceStartBtn = $('forceStartBtn'), startBattleBtn = $('startBattleBtn');
+
+    function proceedAfterReadyCheck() {
+        if (playerPicksCard) {
+            const pickIdx = Math.random() < 0.5 ? 0 : 1;
+            const picker = readyCheckPlayers[pickIdx];
+            showPickCardOverlay(picker);
+        } else {
+            selectedPlayer1 = readyCheckPlayers[0]; selectedPlayer2 = readyCheckPlayers[1];
+            updateSelectedDisplay(); resetGameVisualsOnly();
+            gameMessageSpan.innerText = 'Starting battle!';
+            startAceDuel(); markStateDirty();
         }
-        startTimer(0); startTimer(1);
-
-        $('replaceBtn0').addEventListener('click', () => replacePlayer(0));
-        $('replaceBtn1').addEventListener('click', () => replacePlayer(1));
-        $('cancelReadyBtn').addEventListener('click', () => {
-            readyCheckActive = false; overlay.remove();
-            if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
-            if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
-        });
-
-        const forceStartBtn = $('forceStartBtn'), startBattleBtn = $('startBattleBtn');
-
-        function proceedAfterReadyCheck() {
-            if (playerPicksCard) {
-                const pickIdx = Math.random() < 0.5 ? 0 : 1;
-                const picker = readyCheckPlayers[pickIdx];
-                showPickCardOverlay(picker);
-            } else {
-                selectedPlayer1 = readyCheckPlayers[0]; selectedPlayer2 = readyCheckPlayers[1];
-                updateSelectedDisplay(); resetGameVisualsOnly();
-                gameMessageSpan.innerText = 'Starting battle!';
-                startAceDuel(); markStateDirty();
-            }
-        }
-
-        forceStartBtn.addEventListener('click', () => {
-            readyCheckActive = false; overlay.remove();
-            if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
-            if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
-            proceedAfterReadyCheck();
-        });
-
-        function replacePlayer(idx) {
-            if (!readyCheckActive) return;
-            const avail = participants.filter(p => !readyCheckPlayers.map(x => x.name.toLowerCase()).includes(p.name.toLowerCase()));
-            if (!avail.length) return;
-            readyCheckPlayers[idx] = avail[Math.floor(Math.random() * avail.length)];
-            readyStatus[idx] = false; readyMessageLogs[idx] = [];
-            const card = overlay.querySelector(`.ready-player-card[data-player="${idx}"]`);
-            card.querySelector('.ready-player-name').innerHTML = escapeHtml(readyCheckPlayers[idx].name);
-            const se = $(`readyStatus${idx}`); se.className = 'ready-status waiting'; se.textContent = '⏳ Waiting for message...';
-            $(`readyLog${idx}`).innerHTML = '';
-            if (readyTimerIntervals[idx]) clearInterval(readyTimerIntervals[idx]);
-            startTimer(idx);
-        }
-
-        window._readyCheckCallback = (username, content) => {
-            if (!readyCheckActive) return;
-            for (let i = 0; i < 2; i++) {
-                if (!readyCheckPlayers[i] || readyCheckPlayers[i].name.toLowerCase() !== username.toLowerCase()) continue;
-                if (!readyStatus[i]) {
-                    readyStatus[i] = true;
-                    const se = $(`readyStatus${i}`); se.className = 'ready-status ready'; se.textContent = '✅ Ready!';
-                    if (readyTimerIntervals[i]) clearInterval(readyTimerIntervals[i]);
-                    const te = $(`readyTimer${i}`), be = $(`timerBar${i}`);
-                    te.textContent = 'Ready!'; if (be) be.style.width = '100%';
-                }
-                readyMessageLogs[i].push({ message: content, timestamp: new Date().toLocaleTimeString() });
-                const le = $(`readyLog${i}`);
-                le.innerHTML = readyMessageLogs[i].map(e => `<div>${e.timestamp} : ${escapeHtml(e.message)}</div>`).join('');
-                le.scrollTop = le.scrollHeight;
-                break;
-            }
-            if (readyStatus[0] && readyStatus[1]) { forceStartBtn.style.display = 'none'; startBattleBtn.style.display = 'block'; }
-        };
-
-        startBattleBtn.addEventListener('click', () => {
-            if (!readyStatus[0] || !readyStatus[1]) { gameMessageSpan.innerText = "Both players must be ready first or click 'Start Anyway'!"; return; }
-            readyCheckActive = false; overlay.remove();
-            if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
-            if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
-            proceedAfterReadyCheck();
-        });
     }
+
+    forceStartBtn.addEventListener('click', () => {
+        readyCheckActive = false; overlay.remove();
+        if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
+        if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
+        proceedAfterReadyCheck();
+    });
+
+    // Live message update callback
+    window._readyCheckCallback = (username, content) => {
+        if (!readyCheckActive) return;
+        for (let i = 0; i < 2; i++) {
+            if (!readyCheckPlayers[i] || readyCheckPlayers[i].name.toLowerCase() !== username.toLowerCase()) continue;
+            // Mark ready if not already
+            if (!readyStatus[i]) {
+                readyStatus[i] = true;
+                const se = $(`readyStatus${i}`); se.className = 'ready-status ready'; se.textContent = '✅ Ready!';
+                if (readyTimerIntervals[i]) clearInterval(readyTimerIntervals[i]);
+                const te = $(`readyTimer${i}`), be = $(`timerBar${i}`);
+                te.textContent = 'Ready!'; if (be) be.style.width = '100%';
+            }
+            // Add to ready message log (optional, but keep for history)
+            readyMessageLogs[i].push({ message: content, timestamp: new Date().toLocaleTimeString() });
+            // Also add to the live chat container
+            const msgDiv = document.createElement('div');
+            msgDiv.innerHTML = `[${new Date().toLocaleTimeString()}] ${escapeHtml(content)}`;
+            msgContainers[i].appendChild(msgDiv);
+            msgContainers[i].scrollTop = msgContainers[i].scrollHeight;
+            break;
+        }
+        if (readyStatus[0] && readyStatus[1]) { forceStartBtn.style.display = 'none'; startBattleBtn.style.display = 'block'; }
+    };
+
+    startBattleBtn.addEventListener('click', () => {
+        if (!readyStatus[0] || !readyStatus[1]) { gameMessageSpan.innerText = "Both players must be ready first or click 'Start Anyway'!"; return; }
+        readyCheckActive = false; overlay.remove();
+        if (readyTimerIntervals[0]) clearInterval(readyTimerIntervals[0]);
+        if (readyTimerIntervals[1]) clearInterval(readyTimerIntervals[1]);
+        proceedAfterReadyCheck();
+    });
+}
 
     // ========== PLAYER PICKS CARD OVERLAY ==========
     let pickOverlayElement = null;
@@ -1233,24 +1404,30 @@
         playDrawSound();
 
         let isWin = false;
+        let winReason = '';
         if (presetWinEnabled && presetCardCode) {
-            if (card.code === presetCardCode) isWin = true;
+            if (card.code === presetCardCode) {
+                isWin = true;
+                winReason = `drew the preset card ${presetCardCode}!`;
+            }
         } else {
-            if (card.rank === 'A') isWin = true;
+            if (card.rank === 'A') {
+                isWin = true;
+                winReason = 'drew an ACE!';
+            }
         }
 
         if (isWin) {
             duelWinner = { name: cp.name, side: currentTurn }; isDuelActive = false;
             if (drawTimeout) clearTimeout(drawTimeout);
-            const winReason = presetWinEnabled ? `drew the preset card ${presetCardCode}!` : 'drew an ACE!';
             turnStatusSpan.innerText = `WINNER: ${cp.name} ${winReason}`;
             gameMessageSpan.innerText = `${cp.name} pulled the winning card! Victory!`;
             if (currentTurn === 0) p1WinnerBadge.innerHTML = '<div class="winner-badge">WINNER</div>'; else p2WinnerBadge.innerHTML = '<div class="winner-badge">WINNER</div>';
             document.querySelectorAll('.player-card').forEach(c => c.classList.remove('active-turn'));
             shootConfetti();
-            let wm = [];
-            for (let i = 0; i < 2; i++) if (readyCheckPlayers[i] && readyCheckPlayers[i].name === cp.name) wm = readyMessageLogs[i];
-            setTimeout(() => showWinnerOverlay(cp.name, wm), 2000);
+            // No ready-check messages in winner overlay
+            addWinnerToHistory(cp.name, winReason);
+            setTimeout(() => showWinnerOverlay(cp.name, []), 2000);
             drawCount = 0; return;
         }
 
@@ -1308,13 +1485,13 @@
         if (event.data.type === 'KICK_TOKEN') {
             const newToken = event.data.token;
             const newChannel = event.data.channel;
-            // Ignore if already connected to the same channel with open socket
             if (chatInitialized && lastConnectedChannel === newChannel && kickBrowserSocket && kickBrowserSocket.readyState === WebSocket.OPEN) {
                 console.log('Already connected to', newChannel, '- ignoring duplicate token');
                 return;
             }
             kickToken = newToken;
             currentChannel = newChannel;
+            currentChannelKey = newChannel;
             if (currentChannel) {
                 userInfoArea.innerHTML = `<div class="user-info"><div class="user-details">Logged in as <strong>${currentChannel}</strong></div></div>`;
                 setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
@@ -1338,13 +1515,12 @@
         window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
     }
 
-    // Standalone login (only if not in iframe)
     if (!isIframe) {
         loginBtn.addEventListener('click', () => {
             if (isLoggedIn) {
                 manualDisconnect = true;
                 if (reconnectTimer) clearTimeout(reconnectTimer);
-                isLoggedIn = false; kickToken = null; currentChannel = null;
+                isLoggedIn = false; kickToken = null; currentChannel = null; currentChannelKey = '';
                 userInfoArea.innerHTML = '';
                 setConnectionStatus('Not logged in', 'disconnected');
                 loginBtn.textContent = 'Login with Kick';
@@ -1359,7 +1535,7 @@
                 renderParticipants(); updateSelectedDisplay(); resetGameVisualsOnly();
                 gameMessageSpan.innerText = 'Disconnected.';
                 if (window._readyCheckCallback) delete window._readyCheckCallback;
-                localStorage.removeItem('aceRaceState');
+                localStorage.removeItem(getStorageKey('aceRaceState'));
                 return;
             }
             manualDisconnect = false;
@@ -1371,6 +1547,7 @@
                 manualDisconnect = false;
                 kickToken = event.data.token;
                 currentChannel = event.data.channel;
+                currentChannelKey = currentChannel;
                 participants = [];
                 selectedPlayer1 = null; selectedPlayer2 = null;
                 readyCheckPlayers = [null, null]; readyStatus = [false, false]; readyMessageLogs = [[], []];
@@ -1391,7 +1568,7 @@
                 }
                 loginBtn.textContent = 'Disconnect';
                 isLoggedIn = true;
-                localStorage.removeItem('aceRaceState');
+                localStorage.removeItem(getStorageKey('aceRaceState'));
                 renderParticipants(); updateSelectedDisplay(); resetGameVisualsOnly();
                 startReadyCheckContainer.style.display = 'none';
                 saveState();
@@ -1404,12 +1581,12 @@
         const channel = channelNameInput.value.trim();
         if (!channel) { alert('Enter a channel name.'); return; }
         currentChannel = channel;
+        currentChannelKey = channel;
         manualDisconnect = false;
         startKickBrowserChat(currentChannel);
         saveState();
     });
 
-    // Initialisation
     renderParticipants();
     radioKeyword.checked = true;
     currentMode = 'keyword';
@@ -1419,7 +1596,6 @@
     loadState();
     setTimeout(() => { showCardBack(p1CardSlot); showCardBack(p2CardSlot); }, 100);
 
-    // Hide own kick panel when inside iframe
     if (isIframe) {
         const kickPanel = document.getElementById('kickPanelGame');
         if (kickPanel) kickPanel.style.display = 'none';

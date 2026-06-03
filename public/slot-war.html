@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Slot War — Team Duel Game</title>
+    <title>Slot War — Team Duel Game (Winner History + Multi‑Channel)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(25, 198, 253, 0.15), transparent), radial-gradient(ellipse 60% 80% at 80% 60%, rgba(6, 93, 230, 0.1), transparent), #0a0c12; min-height: 100vh; padding: 24px; color: #e2e8f0; }
-        /* Wider game container */
         .game-container { max-width: 1800px; width: 95%; margin: 0 auto; background: rgba(10, 14, 23, 0.6); backdrop-filter: blur(12px); border-radius: 48px; padding: 24px 28px; border: 1px solid rgba(25, 198, 253, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
         .title { text-align: center; font-size: 3rem; font-weight: 800; font-family: 'Orbitron', monospace; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; text-shadow: 0 0 20px rgba(25, 198, 253, 0.3); animation: titlePulse 1.5s infinite; }
         @keyframes titlePulse { 0% { text-shadow: 0 0 5px #19C6FD; } 50% { text-shadow: 0 0 25px #19C6FD, 0 0 10px #3b82f6; } 100% { text-shadow: 0 0 5px #19C6FD; } }
@@ -29,11 +28,9 @@
         .remove-participant:hover { transform: scale(1.05); background: #ef4444; }
         .slot-select { width: 100%; padding: 10px 14px; border-radius: 60px; border: 1px solid rgba(25, 198, 253, 0.3); background: #0f172a; color: #f1f5f9; outline: none; font-family: inherit; margin-bottom: 12px; }
         .slot-select optgroup { background: #1e293b; color: #f1f5f9; }
-        /* Larger slot preview */
         .slot-preview { text-align: center; margin: 10px 0; }
         .slot-preview img { width: 140px; height: 196px; object-fit: contain; border-radius: 16px; background: #1e293b; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); transition: transform 0.2s; }
         .slot-preview img:hover { transform: scale(1.02); }
-        /* Bigger slot name */
         .slot-name { font-size: 1rem; margin-top: 8px; text-align: center; color: #cbd5e1; font-weight: 600; }
         .btn, button:not(.remove-participant):not(.filter-actions button) {
             background: linear-gradient(135deg, #19C6FD, #3b82f6);
@@ -57,10 +54,12 @@
         .btn-success { background: #22c55e; }
         .connection-status { font-size: 0.8rem; margin-top: 10px; padding: 8px 12px; border-radius: 60px; text-align: center; background: rgba(255,255,255,0.08); color: #cbd5e1; }
         .winner-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 10000; cursor: pointer; }
-        .winner-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 48px; padding: 40px 60px; text-align: center; border: 2px solid #19C6FD; max-width: 600px; width: 90%; color: #f1f5f9; }
+        .winner-card { background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 48px; padding: 40px 60px; text-align: center; border: 2px solid #19C6FD; max-width: 800px; width: 90%; color: #f1f5f9; max-height: 90vh; overflow-y: auto; }
         .winner-card h1 { font-size: 2.5rem; background: linear-gradient(135deg, #19C6FD, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .winner-name { font-size: 2.8rem; font-weight: 800; margin: 20px 0; text-shadow: 0 0 10px #19C6FD; font-family: 'Orbitron', monospace; }
         .winner-slot-img { width: 100px; margin: 10px auto; border-radius: 12px; }
+        .winner-chat-log { background: rgba(0,0,0,0.6); border-radius: 24px; padding: 15px; margin: 20px 0; max-height: 300px; overflow-y: auto; text-align: left; font-family: monospace; font-size: 0.85rem; color: #cbd5e1; border: 1px solid rgba(25,198,253,0.3); }
+        .winner-chat-log div { padding: 6px 0; border-bottom: 1px solid #334155; }
         .confetti-piece { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 9999; animation: confettiFall 1.5s ease-out forwards; }
         @keyframes confettiFall { to { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
         .toggle-group { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -71,7 +70,6 @@
         .filter-panel { max-height: 300px; overflow-y: auto; margin-bottom: 12px; scrollbar-width: thin; }
         .filter-provider { display: flex; align-items: center; gap: 12px; margin: 6px 0; cursor: pointer; font-size: 0.85rem; padding: 4px 0; }
         .filter-provider:hover { background: rgba(25,198,253,0.1); border-radius: 20px; padding-left: 4px; }
-        /* Custom checkboxes */
         .filter-provider input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
@@ -116,14 +114,11 @@
         .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
         .action-group { display: flex; gap: 8px; }
         .action-group button { flex: 1; margin: 0; }
-        /* Random Slot Picker panel */
         .random-slot-panel { text-align: center; }
         .random-slot-buttons { display: flex; gap: 8px; margin-top: 12px; }
         .random-slot-buttons button { flex: 1; margin-bottom: 0; }
         .spin-animation-area { min-height: 150px; margin: 10px 0; display: flex; align-items: center; justify-content: center; }
-        /* Larger spinning image */
         #randomSlotResultImg { width: 120px; height: 168px; object-fit: contain; border-radius: 16px; background: #1e293b; transition: transform 0.1s linear, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        /* Top providers - CSS Grid wraps into 3-5 rows */
         .top-providers {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, auto));
@@ -162,6 +157,24 @@
             color: #19C6FD;
             border-left: 3px solid #19C6FD;
             padding-left: 8px;
+        }
+        .chat-log-panel, .history-panel {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 12px;
+            margin-top: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            font-family: monospace;
+        }
+        .chat-log-panel div, .history-panel div {
+            padding: 4px 0;
+            border-bottom: 1px solid #334155;
+            color: #cbd5e1;
+        }
+        .history-panel .winner-entry {
+            color: #fbbf24;
         }
     </style>
 </head>
@@ -207,6 +220,14 @@
                 </div>
                 <div id="providerFilterList" class="filter-panel"></div>
             </div>
+            <div class="panel">
+                <div class="panel-title">📜 Stream Chat Log</div>
+                <div id="chatLogPanel" class="chat-log-panel">Waiting for messages...</div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">🏆 Last 20 Winners</div>
+                <div id="winnerHistoryPanel" class="history-panel">No winners yet</div>
+            </div>
         </div>
 
         <div class="middle-column">
@@ -245,7 +266,6 @@
                     <button id="selectSlotsBtn" style="background: linear-gradient(135deg, #f59e0b, #eab308);">Select Slots</button>
                 </div>
             </div>
-
             <div class="panel random-slot-panel">
                 <div class="panel-title">🎲 Random Slot Picker</div>
                 <div class="spin-animation-area">
@@ -264,13 +284,77 @@
 </div>
 
 <script>
+    // ========== MULTI-CHANNEL SUPPORT ==========
+    let currentChannelKey = '';
+    function getStorageKey(base) {
+        return currentChannelKey ? `${base}_${currentChannelKey}` : base;
+    }
+
+    // ========== GLOBAL CHAT LOG & WINNER HISTORY ==========
+    let fullChatLog = [];
+    let winnerHistory = [];
+    const MAX_CHAT_LOG = 200;
+    const MAX_WINNERS = 20;
+
+    // ========== FIXED: addChatMessage with live update for winner overlay ==========
+    function addChatMessage(username, message) {
+        const timestamp = new Date().toLocaleTimeString();
+        fullChatLog.unshift({ username, message, timestamp });
+        if (fullChatLog.length > MAX_CHAT_LOG) fullChatLog.pop();
+        updateChatLogPanel();
+
+        // Live update for winner overlay (only winner's messages)
+        if (currentWinnerOverlay && currentWinnerName && username.toLowerCase() === currentWinnerName.toLowerCase()) {
+            const mainChatDiv = currentWinnerOverlay.querySelector('.winner-main-chat');
+            if (mainChatDiv) {
+                const newMsgDiv = document.createElement('div');
+                newMsgDiv.innerHTML = `[${timestamp}] ${escapeHtml(message)}`;
+                mainChatDiv.appendChild(newMsgDiv);
+                mainChatDiv.scrollTop = mainChatDiv.scrollHeight;
+            }
+        }
+    }
+
+    function updateChatLogPanel() {
+        const panel = document.getElementById('chatLogPanel');
+        if (!panel) return;
+        if (fullChatLog.length === 0) {
+            panel.innerHTML = 'Waiting for messages...';
+            return;
+        }
+        panel.innerHTML = fullChatLog.map(entry => 
+            `<div>[${entry.timestamp}] <strong>${escapeHtml(entry.username)}</strong>: ${escapeHtml(entry.message)}</div>`
+        ).join('');
+        panel.scrollTop = 0;
+    }
+
+    function addWinnerToHistory(winnerName, team, slotName) {
+        const timestamp = new Date().toLocaleString();
+        winnerHistory.unshift({ timestamp, winnerName, team, slotName });
+        if (winnerHistory.length > MAX_WINNERS) winnerHistory.pop();
+        updateWinnerHistoryPanel();
+        saveState();
+    }
+
+    function updateWinnerHistoryPanel() {
+        const panel = document.getElementById('winnerHistoryPanel');
+        if (!panel) return;
+        if (winnerHistory.length === 0) {
+            panel.innerHTML = 'No winners yet';
+            return;
+        }
+        panel.innerHTML = winnerHistory.map(entry => 
+            `<div class="winner-entry">🏆 [${entry.timestamp}] ${escapeHtml(entry.winnerName)} (Team ${entry.team}) – ${escapeHtml(entry.slotName)}</div>`
+        ).join('');
+        panel.scrollTop = 0;
+    }
+
     // ========== UNIQUE CLIENT ID ==========
     const clientId = Math.random().toString(36).substring(2, 15);
     console.log('Client ID:', clientId);
 
-    // ========== 1. LOAD SLOT DATA ==========
+    // ========== LOAD SLOT DATA ==========
     let slotData = [];
-
     async function loadSlotData() {
         try {
             const res = await fetch('/slots.json');
@@ -295,8 +379,9 @@
         }
     }
 
-    // ========== 2. GLOBAL STATE ==========
+    // ========== GLOBAL STATE ==========
     let participants = [];
+    let participantsMap = new Map(); // id -> participant
     let joinedUsers = new Set();
     let joiningOpen = true;
     let selectedSlotA = null;
@@ -309,9 +394,13 @@
     let reconnectAttempt = 0;
     let manualDisconnect = false;
     let currentWinnerOverlay = null;
+    let currentWinnerName = null;
 
     let selectedProviders = new Set();
     let providerSearchTerm = '';
+
+    let lastWinnerA = null;
+    let lastWinnerB = null;
 
     const loginBtn = document.getElementById('loginBtn');
     const channelNameInput = document.getElementById('channelNameInput');
@@ -345,27 +434,32 @@
 
     // ========== WEBSOCKET SYNC ==========
     let ws = null;
-
     function connectWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}`;
         ws = new WebSocket(wsUrl);
-
         ws.onopen = () => {
             console.log('Game WebSocket connected, clientId:', clientId);
+            if (currentChannel) {
+                ws.send(JSON.stringify({ type: 'joinRoom', room: currentChannel, clientId }));
+            }
             sendParticipantsToServer();
             sendSlotsToServer();
         };
-
         ws.onmessage = (event) => {
             try {
-                const { type, data } = JSON.parse(event.data);
+                const { type, data, room } = JSON.parse(event.data);
+                if (room && room !== currentChannel) return;
                 if (type === 'participants') {
-                    if (JSON.stringify(data) !== JSON.stringify(participants)) {
+                    const newStr = JSON.stringify(data);
+                    const oldStr = JSON.stringify(participants);
+                    if (newStr !== oldStr) {
                         participants = data;
+                        participantsMap.clear();
+                        participants.forEach(p => participantsMap.set(p.id, p));
                         joinedUsers.clear();
                         participants.forEach(p => joinedUsers.add(p.name.toLowerCase()));
-                        renderTeams();
+                        scheduleRender();
                         saveState();
                     }
                 } else if (type === 'slots') {
@@ -383,7 +477,6 @@
                 }
             } catch(e) { console.warn(e); }
         };
-
         ws.onclose = () => {
             console.log('Game WebSocket disconnected, reconnecting in 1s...');
             setTimeout(connectWebSocket, 1000);
@@ -391,18 +484,28 @@
     }
 
     function sendParticipantsToServer() {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'updateParticipants', data: participants, clientId }));
+        if (ws && ws.readyState === WebSocket.OPEN && currentChannel) {
+            ws.send(JSON.stringify({ type: 'updateParticipants', data: participants, room: currentChannel, clientId }));
         }
     }
 
     function sendSlotsToServer() {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'updateSlots', data: { teamA: selectedSlotA, teamB: selectedSlotB }, clientId }));
+        if (ws && ws.readyState === WebSocket.OPEN && currentChannel) {
+            ws.send(JSON.stringify({ type: 'updateSlots', data: { teamA: selectedSlotA, teamB: selectedSlotB }, room: currentChannel, clientId }));
         }
     }
 
     // ========== GAME LOGIC ==========
+    let renderScheduled = false;
+    function scheduleRender() {
+        if (renderScheduled) return;
+        renderScheduled = true;
+        setTimeout(() => {
+            renderTeams();
+            renderScheduled = false;
+        }, 50);
+    }
+
     function renderTeams() {
         const teamAList = document.getElementById('teamAList');
         const teamBList = document.getElementById('teamBList');
@@ -432,6 +535,7 @@
             btn.addEventListener('click', (e) => {
                 const id = parseFloat(btn.getAttribute('data-id'));
                 participants = participants.filter(p => p.id !== id);
+                participantsMap.delete(id);
                 renderTeams();
                 saveState();
                 sendParticipantsToServer();
@@ -448,9 +552,12 @@
         if (existing) return false;
         const displayName = username.trim();
         const savedPoints = userPointsMap.get(name) || 0;
-        participants.push({ name: displayName, id: Date.now() + Math.random(), team: team.toUpperCase(), points: savedPoints });
+        const newId = Date.now() + Math.random();
+        const newParticipant = { name: displayName, id: newId, team: team.toUpperCase(), points: savedPoints };
+        participants.push(newParticipant);
+        participantsMap.set(newId, newParticipant);
         joinedUsers.add(name);
-        renderTeams();
+        scheduleRender();
         saveState();
         sendParticipantsToServer();
         return true;
@@ -465,14 +572,22 @@
         teamMembers.forEach(p => {
             p.points = (p.points || 0) + 1;
         });
-        renderTeams();
+        scheduleRender();
         saveState();
         sendParticipantsToServer();
         gameMessageSpan.innerText = `Added 1 point to all ${teamMembers.length} members of Team ${team}!`;
         setTimeout(() => gameMessageSpan.innerText = 'Ready.', 3000);
     }
 
+    // ========== FIXED: handleChatMessage always logs ==========
     function handleChatMessage(username, content) {
+        if (!username || !content) return;
+        // Always log every chat message
+        addChatMessage(username, content);
+        
+        // Only process joining if open
+        if (!joiningOpen) return;
+        
         const cmd = content.trim().toLowerCase();
         if (cmd === '!a' || cmd === '!join a') {
             addParticipantToTeam(username, 'A');
@@ -481,7 +596,7 @@
         }
     }
 
-    // ========== PROVIDER FILTERS ==========
+    // ========== PROVIDER FILTERS (unchanged) ==========
     const topProviderList = [
         "Pragmatic Play", "Titan Gaming", "Twist Gaming", "Uppercut Gaming",
         "BGaming", "Hacksaw Gaming", "Backseat Gaming", "Donut Gaming",
@@ -489,15 +604,15 @@
     ];
 
     function saveFilterState() {
-        if (!isLoggedIn) return;
-        localStorage.setItem('slotWarFilterState', JSON.stringify({
+        if (!isLoggedIn || !currentChannel) return;
+        localStorage.setItem(getStorageKey('slotWarFilterState'), JSON.stringify({
             selectedProviders: Array.from(selectedProviders),
             providerSearchTerm: providerSearchTerm
         }));
     }
 
     function loadFilterState() {
-        const saved = localStorage.getItem('slotWarFilterState');
+        const saved = localStorage.getItem(getStorageKey('slotWarFilterState'));
         if (saved) {
             try {
                 const s = JSON.parse(saved);
@@ -778,13 +893,29 @@
         sendSlotsToServer();
     });
 
-    // ========== WHEEL (with random stop offset) ==========
+    // ========== WINNER WHEEL ==========
     function showWheelOverlay(team, addPoints = false) {
-        const teamMembers = participants.filter(p => p.team === team);
+        let teamMembers = participants.filter(p => p.team === team);
         if (teamMembers.length === 0) {
             alert(`No members in Team ${team}. Cannot pick winner.`);
             return false;
         }
+
+        let shuffled = [...teamMembers];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+            [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+        }
+
+        let winner = shuffled[0];
+        const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
+        if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) {
+            winner = shuffled[1] || shuffled[0];
+        }
+        const winnerName = winner.name;
+        if (team === 'A') lastWinnerA = winnerName;
+        else lastWinnerB = winnerName;
+
         const names = teamMembers.map(p => p.name);
         const overlay = document.createElement('div');
         overlay.className = 'wheel-overlay';
@@ -804,13 +935,13 @@
         let repeated = [];
         for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
         scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+
         const firstItem = scroller.querySelector('.wheel-item');
         const itemHeight = firstItem.getBoundingClientRect().height;
         const viewportHeight = 200;
         const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
         const totalItems = repeated.length;
-        const winnerIndex = Math.floor(Math.random() * names.length);
-        const winnerName = names[winnerIndex];
+
         let targetIdx = -1;
         const middleStart = Math.floor(totalItems * 0.3);
         const middleEnd = Math.floor(totalItems * 0.7);
@@ -829,14 +960,16 @@
             }
         }
         if (targetIdx === -1) targetIdx = 0;
-        const randomOffset = (Math.random() - 0.5) * itemHeight * 0.8;
-        let targetOffset = -(targetIdx * itemHeight) + centerOffset + randomOffset;
+
+        let targetOffset = -(targetIdx * itemHeight) + centerOffset;
         const maxOffset = -(0 * itemHeight) + centerOffset;
         const minOffset = -((totalItems-1) * itemHeight) + centerOffset;
         targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
+
         const duration = 6 + Math.random() * 5;
         scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
         scroller.style.transform = `translateY(${targetOffset}px)`;
+
         const resultDiv = document.getElementById('wheelResult');
         scroller.addEventListener('transitionend', () => {
             if (addPoints) {
@@ -857,9 +990,11 @@
             shootConfetti();
             const slot = team === 'A' ? selectedSlotA : selectedSlotB;
             if (slot) {
+                addWinnerToHistory(winnerName, team, slot.name);
                 showWinnerOverlay(winnerName, team, slot);
             }
         }, { once: true });
+
         document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
         return true;
     }
@@ -888,8 +1023,18 @@
     }
     function shootConfetti() { for (let i = 0; i < 80; i++) setTimeout(shootConfettiPiece, i * 15); }
 
+    // ========== FIXED WINNER OVERLAY (only winner's messages, live updates) ==========
     function showWinnerOverlay(winnerName, team, slot) {
         if (currentWinnerOverlay) currentWinnerOverlay.remove();
+
+        // Filter only winner's own messages
+        const winnersOwnChat = fullChatLog
+            .filter(entry => entry.username.toLowerCase() === winnerName.toLowerCase())
+            .slice(0, 30)
+            .map(entry => `<div>[${entry.timestamp}] ${escapeHtml(entry.message)}</div>`)
+            .join('');
+        const chatLogHtml = winnersOwnChat.length ? winnersOwnChat : '<div>No recent messages from this winner in the chat log.</div>';
+
         const overlay = document.createElement('div');
         overlay.className = 'winner-overlay';
         overlay.innerHTML = `
@@ -899,13 +1044,19 @@
                 <div style="font-size:1.2rem;">Team ${team} wins with</div>
                 <div class="winner-slot-img"><img src="${slot.image_url}" style="width:100px;border-radius:12px;"></div>
                 <div>${escapeHtml(slot.name)}</div>
+                <div class="winner-chat-log">
+                    <strong>📝 ${escapeHtml(winnerName)}'s chat messages (last 30)</strong>
+                    <div class="winner-main-chat" style="margin-top: 10px;">${chatLogHtml}</div>
+                </div>
                 <button id="closeWinnerBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Continue</button>
             </div>`;
         document.body.appendChild(overlay);
         currentWinnerOverlay = overlay;
+        currentWinnerName = winnerName;
         document.getElementById('closeWinnerBtn').addEventListener('click', () => {
             overlay.remove();
             currentWinnerOverlay = null;
+            currentWinnerName = null;
         });
         overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     }
@@ -928,14 +1079,12 @@
         }
     });
 
-    // ========== RANDOM SLOT PICKER (longer & better animation) ==========
+    // ========== RANDOM SLOT PICKER ==========
     let isSpinning = false;
     let spinInterval = null;
-
     function getFilteredSlots() {
         return slotData.filter(slot => selectedProviders.has(slot.provider));
     }
-
     function startSpinAnimation(team) {
         if (isSpinning) return;
         const filtered = getFilteredSlots();
@@ -943,21 +1092,17 @@
             gameMessageSpan.innerText = '❌ No slots match the selected filters';
             return;
         }
-
         isSpinning = true;
         const targetButton = team === 'A' ? randomForABtn : randomForBBtn;
         targetButton.disabled = true;
         randomForABtn.disabled = true;
         randomForBBtn.disabled = true;
-
         let frames = 0;
-        const totalFrames = 30;          // more frames = longer animation (30 frames)
-        const frameDelay = 80;           // 80ms each = 2.4 seconds total
+        const totalFrames = 30;
+        const frameDelay = 80;
         const randomIndex = Math.floor(Math.random() * filtered.length);
         const chosenSlot = filtered[randomIndex];
-
         randomSlotResultImg.style.display = 'block';
-        // Add a pulsing scale effect
         randomSlotResultImg.style.transition = 'transform 0.1s linear';
         spinInterval = setInterval(() => {
             if (frames >= totalFrames) {
@@ -966,7 +1111,6 @@
                 randomForABtn.disabled = false;
                 randomForBBtn.disabled = false;
                 targetButton.disabled = false;
-
                 if (team === 'A') {
                     selectedSlotA = chosenSlot;
                     updateSlotPreview('A', selectedSlotA);
@@ -985,24 +1129,18 @@
                 randomSlotResultImg.src = chosenSlot.image_url;
                 randomSlotResultImg.style.transform = 'rotateY(0deg) scale(1)';
                 randomSlotResultImg.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-                // Add a bounce effect at the end
                 randomSlotResultImg.style.transform = 'scale(1.05)';
-                setTimeout(() => {
-                    randomSlotResultImg.style.transform = 'scale(1)';
-                }, 200);
+                setTimeout(() => { randomSlotResultImg.style.transform = 'scale(1)'; }, 200);
                 return;
             }
-
             const tempSlot = filtered[Math.floor(Math.random() * filtered.length)];
             randomSlotResultImg.src = tempSlot.image_url;
-            // Spin rotation: increase rotation angle each frame, add slight scale pulse
             const rotation = frames * 22;
-            const scale = 1 + Math.sin(frames * 0.8) * 0.05; // subtle pulse
+            const scale = 1 + Math.sin(frames * 0.8) * 0.05;
             randomSlotResultImg.style.transform = `rotateY(${rotation}deg) scale(${scale})`;
             frames++;
         }, frameDelay);
     }
-
     randomForABtn.addEventListener('click', () => startSpinAnimation('A'));
     randomForBBtn.addEventListener('click', () => startSpinAnimation('B'));
 
@@ -1075,6 +1213,7 @@
             });
             kickBrowserSocket = wsChat;
             currentChannel = channelName;
+            currentChannelKey = channelName;
             saveState();
         } catch (err) {
             setConnectionStatus(`${err.message}`, 'failed');
@@ -1087,29 +1226,41 @@
         statusDisplay.className = 'connection-status';
     }
 
+    let saveTimeout = null;
     function saveState() {
-        if (!isLoggedIn) return;
-        localStorage.setItem('slotWarState', JSON.stringify({
-            participants, joiningOpen, selectedSlotA: selectedSlotA?.name, selectedSlotB: selectedSlotB?.name,
-            kickToken, currentChannel, isLoggedIn, joinedUsers: Array.from(joinedUsers)
-        }));
-        saveFilterState();
+        if (!isLoggedIn || !currentChannel) return;
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            localStorage.setItem(getStorageKey('slotWarState'), JSON.stringify({
+                participants, joiningOpen, selectedSlotA: selectedSlotA?.name, selectedSlotB: selectedSlotB?.name,
+                kickToken, currentChannel, isLoggedIn, joinedUsers: Array.from(joinedUsers),
+                lastWinnerA, lastWinnerB, winnerHistory
+            }));
+            saveFilterState();
+            saveTimeout = null;
+        }, 500);
     }
 
     function loadState() {
-        const saved = localStorage.getItem('slotWarState');
+        const saved = localStorage.getItem(getStorageKey('slotWarState'));
         if (!saved) return;
         try {
             const s = JSON.parse(saved);
             if (!s.isLoggedIn || !s.currentChannel) return;
             participants = s.participants || [];
+            participants.forEach(p => participantsMap.set(p.id, p));
             joiningOpen = s.joiningOpen !== false;
             if (s.selectedSlotA) selectedSlotA = slotData.find(sl => sl.name === s.selectedSlotA);
             if (s.selectedSlotB) selectedSlotB = slotData.find(sl => sl.name === s.selectedSlotB);
             kickToken = s.kickToken;
             currentChannel = s.currentChannel;
+            currentChannelKey = currentChannel;
             isLoggedIn = s.isLoggedIn;
             if (s.joinedUsers) joinedUsers = new Set(s.joinedUsers);
+            if (s.lastWinnerA) lastWinnerA = s.lastWinnerA;
+            if (s.lastWinnerB) lastWinnerB = s.lastWinnerB;
+            if (s.winnerHistory) winnerHistory = s.winnerHistory;
+            updateWinnerHistoryPanel();
             if (currentChannel) channelNameInput.value = currentChannel;
             if (isLoggedIn && currentChannel) {
                 userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
@@ -1164,6 +1315,7 @@
             userPointsMap.set(key, (userPointsMap.get(key) || 0) + (p.points || 0));
         });
         participants = [];
+        participantsMap.clear();
         joinedUsers.clear();
         renderTeams();
         if (slotData.length) {
@@ -1183,45 +1335,36 @@
     }
     clearTeamsBtn.addEventListener('click', clearAllTeams);
     resetGameBtn.addEventListener('click', () => {
-        if (confirm("RESET GAME\n\nThis will reset ALL points and clear all teams.\n\nAre you sure?")) {
-            userPointsMap.clear();
-            participants = [];
-            joinedUsers.clear();
-            renderTeams();
-            if (slotData.length) {
-                selectedSlotA = slotData[0];
-                selectedSlotB = slotData[0];
-                updateSlotPreview('A', selectedSlotA);
-                updateSlotPreview('B', selectedSlotB);
-                slotASelect.value = slotData[0].name;
-                slotBSelect.value = slotData[0].name;
-                updateSlotNameDisplay();
-                sendSlotsToServer();
-            } else {
-                selectedSlotA = null;
-                selectedSlotB = null;
-                slotAPreview.innerHTML = '';
-                slotBPreview.innerHTML = '';
-                slotAName.innerHTML = '';
-                slotBName.innerHTML = '';
-                sendSlotsToServer();
+    if (confirm("RESET GAME\n\nThis will reset ALL points, clear all teams, and remove all saved test users.\n\nThe page will reload to start fresh.\n\nAre you sure?")) {
+        // Clear all localStorage data for this channel
+        localStorage.removeItem(getStorageKey('slotWarState'));
+        localStorage.removeItem(getStorageKey('slotWarFilterState'));
+        localStorage.removeItem(getStorageKey('slotWarUserPoints'));
+        
+        // Also clear any other potential storage keys
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('slotWar') || key.includes('aceRace'))) {
+                keysToRemove.push(key);
             }
-            saveState();
-            sendParticipantsToServer();
-            gameMessageSpan.innerText = 'Game reset. All points cleared.';
-            setTimeout(() => gameMessageSpan.innerText = 'Ready.', 3000);
         }
-    });
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Reload the page to start completely fresh
+        location.reload();
+    }
+});
 
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m); }
 
     // ========== IFRAME / STANDALONE AUTH ==========
     let isIframe = window.parent !== window;
-
     function handleTokenFromParent(event) {
         if (event.data.type === 'KICK_TOKEN') {
             kickToken = event.data.token;
             currentChannel = event.data.channel;
+            currentChannelKey = currentChannel;
             if (currentChannel) {
                 userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
                 setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
@@ -1235,26 +1378,25 @@
             saveState();
         }
     }
-
     if (isIframe) {
         window.addEventListener('message', handleTokenFromParent);
         window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
     }
-
     if (!isIframe) {
         loginBtn.addEventListener('click', () => {
             if (isLoggedIn) {
                 manualDisconnect = true;
                 if (reconnectTimer) clearTimeout(reconnectTimer);
-                isLoggedIn = false; kickToken = null; currentChannel = null;
+                isLoggedIn = false; kickToken = null; currentChannel = null; currentChannelKey = '';
                 userInfoArea.innerHTML = '';
                 setConnectionStatus('Not logged in', 'disconnected');
                 loginBtn.textContent = 'Login with Kick';
                 participants = [];
+                participantsMap.clear();
                 joinedUsers.clear();
                 renderTeams();
                 stopKickBrowserChat();
-                localStorage.removeItem('slotWarState');
+                localStorage.removeItem(getStorageKey('slotWarState'));
                 sendParticipantsToServer();
                 sendSlotsToServer();
                 return;
@@ -1262,13 +1404,14 @@
             manualDisconnect = false;
             window.open('/auth/kick', 'KickLogin', 'width=600,height=700');
         });
-
         window.addEventListener('message', (event) => {
             if (event.data.type === 'KICK_TOKEN') {
                 manualDisconnect = false;
                 kickToken = event.data.token;
                 currentChannel = event.data.channel;
+                currentChannelKey = currentChannel;
                 participants = [];
+                participantsMap.clear();
                 joinedUsers.clear();
                 renderTeams();
                 if (currentChannel) {
@@ -1282,17 +1425,17 @@
                 }
                 loginBtn.textContent = 'Disconnect';
                 isLoggedIn = true;
-                localStorage.removeItem('slotWarState');
+                localStorage.removeItem(getStorageKey('slotWarState'));
                 saveState();
             }
         });
     }
-
     connectChannelBtn.addEventListener('click', () => {
         if (!isLoggedIn) { alert('Please log in first.'); return; }
         const channel = channelNameInput.value.trim();
         if (!channel) { alert('Enter a channel name.'); return; }
         currentChannel = channel;
+        currentChannelKey = channel;
         manualDisconnect = false;
         startKickBrowserChat(currentChannel);
         saveState();
@@ -1301,7 +1444,7 @@
     connectWebSocket();
     loadSlotData().then(() => {
         loadState();
-        const savedMap = localStorage.getItem('slotWarUserPoints');
+        const savedMap = localStorage.getItem(getStorageKey('slotWarUserPoints'));
         if (savedMap) {
             try {
                 const parsed = JSON.parse(savedMap);
@@ -1310,11 +1453,10 @@
         }
     });
     setInterval(() => {
-        if (isLoggedIn) {
-            localStorage.setItem('slotWarUserPoints', JSON.stringify(Array.from(userPointsMap.entries())));
+        if (isLoggedIn && currentChannel) {
+            localStorage.setItem(getStorageKey('slotWarUserPoints'), JSON.stringify(Array.from(userPointsMap.entries())));
         }
     }, 5000);
-
     if (isIframe) {
         const kickPanel = document.getElementById('kickPanel');
         if (kickPanel) kickPanel.style.display = 'none';
