@@ -199,11 +199,11 @@
                     <button id="closeJoiningBtn" class="btn-danger">Close Joining</button>
                 </div>
                 <button id="clearTeamsBtn" class="btn-secondary">Clear Teams</button>
-                <button id="resetGameBtn" class="btn-secondary">Reset Game</button>
+                <button id="resetGameBtn" class="btn-danger">Reset Game (Hard Reset)</button>
             </div>
             <div class="panel">
                 <div class="panel-title">Manual Add (Test)</div>
-                <input type="text" id="manualUsername" class="input-field" placeholder="Username (optional)" maxlength="20">
+                <input type="text" id="manualUsername" class="input-field" placeholder="Username (required)" maxlength="20">
                 <div class="action-group" style="display: flex; gap: 8px;">
                     <button id="manualAddA" class="btn-success" style="flex:1;">Add to Team A</button>
                     <button id="manualAddB" class="btn-danger" style="flex:1;">Add to Team B</button>
@@ -296,14 +296,13 @@
     const MAX_CHAT_LOG = 200;
     const MAX_WINNERS = 20;
 
-    // ========== FIXED: addChatMessage with live update for winner overlay ==========
     function addChatMessage(username, message) {
         const timestamp = new Date().toLocaleTimeString();
         fullChatLog.unshift({ username, message, timestamp });
         if (fullChatLog.length > MAX_CHAT_LOG) fullChatLog.pop();
         updateChatLogPanel();
 
-        // Live update for winner overlay (only winner's messages)
+        // Live update for winner overlay
         if (currentWinnerOverlay && currentWinnerName && username.toLowerCase() === currentWinnerName.toLowerCase()) {
             const mainChatDiv = currentWinnerOverlay.querySelector('.winner-main-chat');
             if (mainChatDiv) {
@@ -381,7 +380,7 @@
 
     // ========== GLOBAL STATE ==========
     let participants = [];
-    let participantsMap = new Map(); // id -> participant
+    let participantsMap = new Map();
     let joinedUsers = new Set();
     let joiningOpen = true;
     let selectedSlotA = null;
@@ -544,7 +543,10 @@
     }
 
     function addParticipantToTeam(username, team) {
-        if (!joiningOpen) return false;
+        if (!joiningOpen) {
+            console.log('Joining is closed, ignoring', username);
+            return false;
+        }
         if (!username || !team) return false;
         const name = username.trim().toLowerCase();
         if (joinedUsers.has(name)) return false;
@@ -560,6 +562,7 @@
         scheduleRender();
         saveState();
         sendParticipantsToServer();
+        console.log(`Added ${displayName} to Team ${team}`);
         return true;
     }
 
@@ -579,15 +582,14 @@
         setTimeout(() => gameMessageSpan.innerText = 'Ready.', 3000);
     }
 
-    // ========== FIXED: handleChatMessage always logs ==========
+    // ========== FIXED: handleChatMessage always logs and processes commands ==========
     function handleChatMessage(username, content) {
         if (!username || !content) return;
         // Always log every chat message
         addChatMessage(username, content);
+        console.log(`[CHAT] ${username}: ${content}`);
         
-        // Only process joining if open
-        if (!joiningOpen) return;
-        
+        // Process joining commands
         const cmd = content.trim().toLowerCase();
         if (cmd === '!a' || cmd === '!join a') {
             addParticipantToTeam(username, 'A');
@@ -596,7 +598,7 @@
         }
     }
 
-    // ========== PROVIDER FILTERS (unchanged) ==========
+    // ========== PROVIDER FILTERS ==========
     const topProviderList = [
         "Pragmatic Play", "Titan Gaming", "Twist Gaming", "Uppercut Gaming",
         "BGaming", "Hacksaw Gaming", "Backseat Gaming", "Donut Gaming",
@@ -1279,16 +1281,22 @@
         } catch(e) { console.warn(e); }
     }
 
-    // ========== MANUAL ADD HANDLERS ==========
+    // ========== MANUAL ADD HANDLERS (no test users) ==========
     manualAddA.addEventListener('click', () => {
         let name = manualUsername.value.trim();
-        if (!name) name = 'TestUser_' + Math.floor(Math.random() * 1000);
+        if (!name) {
+            alert("Please enter a username first.");
+            return;
+        }
         addParticipantToTeam(name, 'A');
         manualUsername.value = '';
     });
     manualAddB.addEventListener('click', () => {
         let name = manualUsername.value.trim();
-        if (!name) name = 'TestUser_' + Math.floor(Math.random() * 1000);
+        if (!name) {
+            alert("Please enter a username first.");
+            return;
+        }
         addParticipantToTeam(name, 'B');
         manualUsername.value = '';
     });
@@ -1298,63 +1306,57 @@
         openJoiningBtn.classList.add('joining-open');
         closeJoiningBtn.classList.remove('joining-closed');
         saveState();
+        gameMessageSpan.innerText = 'Joining is OPEN';
+        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
     });
     closeJoiningBtn.addEventListener('click', () => {
         joiningOpen = false;
         closeJoiningBtn.classList.add('joining-closed');
         openJoiningBtn.classList.remove('joining-open');
         saveState();
+        gameMessageSpan.innerText = 'Joining is CLOSED';
+        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
     });
     if (joiningOpen) openJoiningBtn.classList.add('joining-open');
     else closeJoiningBtn.classList.add('joining-closed');
 
     let userPointsMap = new Map();
     function clearAllTeams() {
-        participants.forEach(p => {
-            const key = p.name.toLowerCase();
-            userPointsMap.set(key, (userPointsMap.get(key) || 0) + (p.points || 0));
-        });
-        participants = [];
-        participantsMap.clear();
-        joinedUsers.clear();
-        renderTeams();
-        if (slotData.length) {
-            selectedSlotA = slotData[0];
-            selectedSlotB = slotData[0];
-            updateSlotPreview('A', selectedSlotA);
-            updateSlotPreview('B', selectedSlotB);
-            slotASelect.value = slotData[0].name;
-            slotBSelect.value = slotData[0].name;
-            updateSlotNameDisplay();
-            sendSlotsToServer();
+        if (confirm("Clear all teams? Points will be preserved.")) {
+            participants = [];
+            participantsMap.clear();
+            joinedUsers.clear();
+            renderTeams();
+            saveState();
+            sendParticipantsToServer();
+            gameMessageSpan.innerText = 'Teams cleared. Points preserved.';
+            setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
         }
-        saveState();
-        sendParticipantsToServer();
-        gameMessageSpan.innerText = 'Teams cleared. Points preserved.';
-        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
     }
     clearTeamsBtn.addEventListener('click', clearAllTeams);
+    
+    // FIXED: Hard reset that clears ALL localStorage and reloads the page
     resetGameBtn.addEventListener('click', () => {
-    if (confirm("RESET GAME\n\nThis will reset ALL points, clear all teams, and remove all saved test users.\n\nThe page will reload to start fresh.\n\nAre you sure?")) {
-        // Clear all localStorage data for this channel
-        localStorage.removeItem(getStorageKey('slotWarState'));
-        localStorage.removeItem(getStorageKey('slotWarFilterState'));
-        localStorage.removeItem(getStorageKey('slotWarUserPoints'));
-        
-        // Also clear any other potential storage keys
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && (key.includes('slotWar') || key.includes('aceRace'))) {
-                keysToRemove.push(key);
+        if (confirm("⚠️ HARD RESET ⚠️\n\nThis will clear ALL teams, points, winners, filters, and saved data.\nThe page will reload to start completely fresh.\n\nAre you sure?")) {
+            // Clear all localStorage for this channel
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.includes('slotWar') || key.includes('aceRace') || key.includes('userPoints'))) {
+                    keysToRemove.push(key);
+                }
             }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Also clear any remaining specific keys
+            localStorage.removeItem(getStorageKey('slotWarState'));
+            localStorage.removeItem(getStorageKey('slotWarFilterState'));
+            localStorage.removeItem(getStorageKey('slotWarUserPoints'));
+            
+            // Reload the page to start fresh
+            location.reload();
         }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-        
-        // Reload the page to start completely fresh
-        location.reload();
-    }
-});
+    });
 
     function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m); }
 
