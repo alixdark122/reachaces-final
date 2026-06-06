@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Slot War — Team Duel Game (Winner History + Multi‑Channel)</title>
+    <title>Slot War — Team Duel Game (Final)</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
@@ -19,8 +19,10 @@
         .panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); border-radius: 28px; padding: 20px; border: 1px solid rgba(25, 198, 253, 0.2); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); margin-bottom: 20px; transition: 0.2s; }
         .team-panel { background: rgba(15, 23, 42, 0.7); height: auto; min-height: 600px; }
         .panel-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 16px; color: #19C6FD; border-left: 4px solid #19C6FD; padding-left: 12px; font-family: 'Orbitron', monospace; letter-spacing: 1px; }
-        .team-list { max-height: 600px; overflow-y: auto; margin-top: 16px; scrollbar-width: none; -ms-overflow-style: none; }
-        .team-list::-webkit-scrollbar { display: none; }
+        .team-list { max-height: 600px; overflow-y: auto; margin-top: 16px; scrollbar-width: thin; }
+        .team-list::-webkit-scrollbar { width: 6px; }
+        .team-list::-webkit-scrollbar-track { background: #0f172a; border-radius: 3px; }
+        .team-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #19C6FD, #3b82f6); border-radius: 3px; }
         .team-item { background: rgba(30, 41, 59, 0.7); margin: 8px 0; padding: 8px 12px; border-radius: 60px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid rgba(25, 198, 253, 0.15); color: #f1f5f9; }
         .team-name { font-weight: 600; word-break: break-word; }
         .team-points { font-family: monospace; font-size: 0.85rem; background: #0f172a; padding: 2px 8px; border-radius: 60px; margin-left: 8px; }
@@ -70,37 +72,10 @@
         .filter-panel { max-height: 300px; overflow-y: auto; margin-bottom: 12px; scrollbar-width: thin; }
         .filter-provider { display: flex; align-items: center; gap: 12px; margin: 6px 0; cursor: pointer; font-size: 0.85rem; padding: 4px 0; }
         .filter-provider:hover { background: rgba(25,198,253,0.1); border-radius: 20px; padding-left: 4px; }
-        .filter-provider input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #19C6FD;
-            border-radius: 4px;
-            background: #0f172a;
-            cursor: pointer;
-            transition: all 0.1s;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        .filter-provider input[type="checkbox"]:checked {
-            background: #19C6FD;
-            position: relative;
-        }
-        .filter-provider input[type="checkbox"]:checked::after {
-            content: "✓";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .filter-provider input[type="checkbox"]:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 0 4px #19C6FD;
-        }
+        .filter-provider input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border: 2px solid #19C6FD; border-radius: 4px; background: #0f172a; cursor: pointer; transition: all 0.1s; margin-right: 10px; vertical-align: middle; }
+        .filter-provider input[type="checkbox"]:checked { background: #19C6FD; position: relative; }
+        .filter-provider input[type="checkbox"]:checked::after { content: "✓"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 12px; font-weight: bold; }
+        .filter-provider input[type="checkbox"]:hover { border-color: #3b82f6; box-shadow: 0 0 4px #19C6FD; }
         .filter-actions { display: flex; gap: 8px; margin-bottom: 12px; }
         .filter-actions button { flex: 1; background: #1e293b; border: none; padding: 4px 8px; border-radius: 60px; font-size: 0.75rem; cursor: pointer; color: #cbd5e1; transition: 0.1s; }
         .filter-actions button:hover { background: #334155; transform: translateY(-1px); }
@@ -181,17 +156,9 @@
 <body>
 <div class="game-container">
     <div class="title">SLOT WAR</div>
-    <div class="sub">Viewers type <strong>!A</strong> or <strong>!B</strong> to join a team (once per round)</div>
+    <div class="sub">Viewers type <strong>!A</strong> or <strong>!B</strong> to join a team</div>
     <div class="three-columns">
         <div class="left-column">
-            <div id="kickPanel" class="panel">
-                <div class="panel-title">Kick Connection</div>
-                <div id="userInfoArea" style="margin-bottom: 16px;"></div>
-                <button id="loginBtn" class="btn-blue">Login with Kick</button>
-                <input id="channelNameInput" class="input-field" placeholder="Enter channel name">
-                <button id="connectChannelBtn" class="btn-blue">Connect</button>
-                <div id="statusDisplay" class="connection-status">Not logged in</div>
-            </div>
             <div class="panel">
                 <div class="panel-title">Streamer Controls</div>
                 <div class="toggle-group">
@@ -199,10 +166,10 @@
                     <button id="closeJoiningBtn" class="btn-danger">Close Joining</button>
                 </div>
                 <button id="clearTeamsBtn" class="btn-secondary">Clear Teams</button>
-                <button id="resetGameBtn" class="btn-danger">Reset Game (Hard Reset)</button>
+                <button id="resetGameBtn" class="btn-danger">🔥 HARD RESET (Wipe ALL Data)</button>
             </div>
             <div class="panel">
-                <div class="panel-title">Manual Add (Test)</div>
+                <div class="panel-title">Manual Add</div>
                 <input type="text" id="manualUsername" class="input-field" placeholder="Username (required)" maxlength="20">
                 <div class="action-group" style="display: flex; gap: 8px;">
                     <button id="manualAddA" class="btn-success" style="flex:1;">Add to Team A</button>
@@ -256,8 +223,8 @@
                 <div id="slotBName" class="slot-name"></div>
                 <div class="action-buttons">
                     <div class="action-group">
-                        <button id="givePointsA" style="background:linear-gradient(135deg,#19C6FD,#3b82f6);">Give Points to Team A</button>
-                        <button id="givePointsB" style="background:linear-gradient(135deg,#19C6FD,#3b82f6);">Give Points to Team B</button>
+                        <button id="givePointsA">Give Points to Team A</button>
+                        <button id="givePointsB">Give Points to Team B</button>
                     </div>
                     <div class="action-group">
                         <button id="pickWinnerA" style="background:linear-gradient(135deg,#f59e0b,#eab308);">Pick Winner from Team A</button>
@@ -275,1194 +242,855 @@
                     <button id="randomForA" class="btn-secondary">🎲 Random for A</button>
                     <button id="randomForB" class="btn-secondary">🎲 Random for B</button>
                 </div>
-                <div class="filter-actions" style="margin-top: 8px; justify-content: center;">
-                    <span style="font-size:0.7rem;">Uses provider filters above</span>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ========== MULTI-CHANNEL SUPPORT ==========
-    let currentChannelKey = '';
-    function getStorageKey(base) {
-        return currentChannelKey ? `${base}_${currentChannelKey}` : base;
-    }
-
-    // ========== GLOBAL CHAT LOG & WINNER HISTORY ==========
-    let fullChatLog = [];
-    let winnerHistory = [];
-    const MAX_CHAT_LOG = 200;
-    const MAX_WINNERS = 20;
-
-    function addChatMessage(username, message) {
-        const timestamp = new Date().toLocaleTimeString();
-        fullChatLog.unshift({ username, message, timestamp });
-        if (fullChatLog.length > MAX_CHAT_LOG) fullChatLog.pop();
-        updateChatLogPanel();
-
-        // Live update for winner overlay
-        if (currentWinnerOverlay && currentWinnerName && username.toLowerCase() === currentWinnerName.toLowerCase()) {
-            const mainChatDiv = currentWinnerOverlay.querySelector('.winner-main-chat');
-            if (mainChatDiv) {
-                const newMsgDiv = document.createElement('div');
-                newMsgDiv.innerHTML = `[${timestamp}] ${escapeHtml(message)}`;
-                mainChatDiv.appendChild(newMsgDiv);
-                mainChatDiv.scrollTop = mainChatDiv.scrollHeight;
-            }
-        }
-    }
-
-    function updateChatLogPanel() {
-        const panel = document.getElementById('chatLogPanel');
-        if (!panel) return;
-        if (fullChatLog.length === 0) {
-            panel.innerHTML = 'Waiting for messages...';
-            return;
-        }
-        panel.innerHTML = fullChatLog.map(entry => 
-            `<div>[${entry.timestamp}] <strong>${escapeHtml(entry.username)}</strong>: ${escapeHtml(entry.message)}</div>`
-        ).join('');
-        panel.scrollTop = 0;
-    }
-
-    function addWinnerToHistory(winnerName, team, slotName) {
-        const timestamp = new Date().toLocaleString();
-        winnerHistory.unshift({ timestamp, winnerName, team, slotName });
-        if (winnerHistory.length > MAX_WINNERS) winnerHistory.pop();
-        updateWinnerHistoryPanel();
-        saveState();
-    }
-
-    function updateWinnerHistoryPanel() {
-        const panel = document.getElementById('winnerHistoryPanel');
-        if (!panel) return;
-        if (winnerHistory.length === 0) {
-            panel.innerHTML = 'No winners yet';
-            return;
-        }
-        panel.innerHTML = winnerHistory.map(entry => 
-            `<div class="winner-entry">🏆 [${entry.timestamp}] ${escapeHtml(entry.winnerName)} (Team ${entry.team}) – ${escapeHtml(entry.slotName)}</div>`
-        ).join('');
-        panel.scrollTop = 0;
-    }
-
-    // ========== UNIQUE CLIENT ID ==========
-    const clientId = Math.random().toString(36).substring(2, 15);
-    console.log('Client ID:', clientId);
-
-    // ========== LOAD SLOT DATA ==========
-    let slotData = [];
-    async function loadSlotData() {
-        try {
-            const res = await fetch('/slots.json');
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            slotData = await res.json();
-            console.log(`Loaded ${slotData.length} slots`);
-            loadFilterState();
-            buildProviderFilters();
-            updateSlotDropdowns();
-            if (slotData.length) {
-                selectedSlotA = slotData[0];
-                selectedSlotB = slotData[0];
-                updateSlotPreview('A', selectedSlotA);
-                updateSlotPreview('B', selectedSlotB);
-                slotASelect.value = slotData[0].name;
-                slotBSelect.value = slotData[0].name;
-                updateSlotNameDisplay();
-                sendSlotsToServer();
-            }
-        } catch (err) {
-            console.error('Failed to load slots.json:', err);
-        }
-    }
-
-    // ========== GLOBAL STATE ==========
-    let participants = [];
-    let participantsMap = new Map();
-    let joinedUsers = new Set();
-    let joiningOpen = true;
-    let selectedSlotA = null;
-    let selectedSlotB = null;
-    let kickBrowserSocket = null;
-    let isLoggedIn = false;
-    let currentChannel = null;
-    let kickToken = null;
-    let reconnectTimer = null;
-    let reconnectAttempt = 0;
-    let manualDisconnect = false;
-    let currentWinnerOverlay = null;
-    let currentWinnerName = null;
-
-    let selectedProviders = new Set();
-    let providerSearchTerm = '';
-
-    let lastWinnerA = null;
-    let lastWinnerB = null;
-
-    const loginBtn = document.getElementById('loginBtn');
-    const channelNameInput = document.getElementById('channelNameInput');
-    const connectChannelBtn = document.getElementById('connectChannelBtn');
-    const statusDisplay = document.getElementById('statusDisplay');
-    const userInfoArea = document.getElementById('userInfoArea');
-    const openJoiningBtn = document.getElementById('openJoiningBtn');
-    const closeJoiningBtn = document.getElementById('closeJoiningBtn');
-    const clearTeamsBtn = document.getElementById('clearTeamsBtn');
-    const resetGameBtn = document.getElementById('resetGameBtn');
-    const givePointsA = document.getElementById('givePointsA');
-    const givePointsB = document.getElementById('givePointsB');
-    const pickWinnerA = document.getElementById('pickWinnerA');
-    const pickWinnerB = document.getElementById('pickWinnerB');
-    const selectSlotsBtn = document.getElementById('selectSlotsBtn');
-    const slotASelect = document.getElementById('slotASelect');
-    const slotBSelect = document.getElementById('slotBSelect');
-    const slotAPreview = document.getElementById('slotAPreview');
-    const slotBPreview = document.getElementById('slotBPreview');
-    const slotAName = document.getElementById('slotAName');
-    const slotBName = document.getElementById('slotBName');
-    const gameMessageSpan = document.getElementById('gameMessage') || (() => { const s = document.createElement('div'); s.id = 'gameMessage'; document.body.appendChild(s); return s; })();
-
-    const manualUsername = document.getElementById('manualUsername');
-    const manualAddA = document.getElementById('manualAddA');
-    const manualAddB = document.getElementById('manualAddB');
-
-    const randomForABtn = document.getElementById('randomForA');
-    const randomForBBtn = document.getElementById('randomForB');
-    const randomSlotResultImg = document.getElementById('randomSlotResultImg');
-
-    // ========== WEBSOCKET SYNC ==========
-    let ws = null;
-    function connectWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}`;
-        ws = new WebSocket(wsUrl);
-        ws.onopen = () => {
-            console.log('Game WebSocket connected, clientId:', clientId);
-            if (currentChannel) {
-                ws.send(JSON.stringify({ type: 'joinRoom', room: currentChannel, clientId }));
-            }
-            sendParticipantsToServer();
-            sendSlotsToServer();
-        };
-        ws.onmessage = (event) => {
-            try {
-                const { type, data, room } = JSON.parse(event.data);
-                if (room && room !== currentChannel) return;
-                if (type === 'participants') {
-                    const newStr = JSON.stringify(data);
-                    const oldStr = JSON.stringify(participants);
-                    if (newStr !== oldStr) {
-                        participants = data;
-                        participantsMap.clear();
-                        participants.forEach(p => participantsMap.set(p.id, p));
-                        joinedUsers.clear();
-                        participants.forEach(p => joinedUsers.add(p.name.toLowerCase()));
-                        scheduleRender();
-                        saveState();
-                    }
-                } else if (type === 'slots') {
-                    if (data.teamA && data.teamA !== selectedSlotA) {
-                        selectedSlotA = data.teamA;
-                        updateSlotPreview('A', selectedSlotA);
-                        if (slotASelect && selectedSlotA) slotASelect.value = selectedSlotA.name;
-                    }
-                    if (data.teamB && data.teamB !== selectedSlotB) {
-                        selectedSlotB = data.teamB;
-                        updateSlotPreview('B', selectedSlotB);
-                        if (slotBSelect && selectedSlotB) slotBSelect.value = selectedSlotB.name;
-                    }
-                    updateSlotNameDisplay();
-                }
-            } catch(e) { console.warn(e); }
-        };
-        ws.onclose = () => {
-            console.log('Game WebSocket disconnected, reconnecting in 1s...');
-            setTimeout(connectWebSocket, 1000);
-        };
-    }
-
-    function sendParticipantsToServer() {
-        if (ws && ws.readyState === WebSocket.OPEN && currentChannel) {
-            ws.send(JSON.stringify({ type: 'updateParticipants', data: participants, room: currentChannel, clientId }));
-        }
-    }
-
-    function sendSlotsToServer() {
-        if (ws && ws.readyState === WebSocket.OPEN && currentChannel) {
-            ws.send(JSON.stringify({ type: 'updateSlots', data: { teamA: selectedSlotA, teamB: selectedSlotB }, room: currentChannel, clientId }));
-        }
-    }
-
-    // ========== GAME LOGIC ==========
-    let renderScheduled = false;
-    function scheduleRender() {
-        if (renderScheduled) return;
-        renderScheduled = true;
-        setTimeout(() => {
-            renderTeams();
-            renderScheduled = false;
-        }, 50);
-    }
-
-    function renderTeams() {
-        const teamAList = document.getElementById('teamAList');
-        const teamBList = document.getElementById('teamBList');
-        teamAList.innerHTML = '';
-        teamBList.innerHTML = '';
-        let aCount = 0, bCount = 0;
-        const sorted = [...participants].sort((a,b) => a.name.localeCompare(b.name));
-        sorted.forEach(p => {
-            const div = document.createElement('div');
-            div.className = 'team-item';
-            div.innerHTML = `<span class="team-name">${escapeHtml(p.name)} <span class="team-points">${p.points || 0}</span></span><button class="remove-participant" data-id="${p.id}" data-team="${p.team}">X</button>`;
-            if (p.team === 'A') {
-                teamAList.appendChild(div);
-                aCount++;
-            } else {
-                teamBList.appendChild(div);
-                bCount++;
-            }
-        });
-        document.getElementById('teamACount').innerText = `(${aCount})`;
-        document.getElementById('teamBCount').innerText = `(${bCount})`;
-
-        if (teamAList.lastChild) teamAList.scrollTop = teamAList.scrollHeight;
-        if (teamBList.lastChild) teamBList.scrollTop = teamBList.scrollHeight;
-
-        document.querySelectorAll('.remove-participant').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = parseFloat(btn.getAttribute('data-id'));
-                participants = participants.filter(p => p.id !== id);
-                participantsMap.delete(id);
-                renderTeams();
-                saveState();
-                sendParticipantsToServer();
-            });
-        });
-    }
-
-    function addParticipantToTeam(username, team) {
-        if (!joiningOpen) {
-            console.log('Joining is closed, ignoring', username);
-            return false;
-        }
-        if (!username || !team) return false;
-        const name = username.trim().toLowerCase();
-        if (joinedUsers.has(name)) return false;
-        const existing = participants.find(p => p.name.toLowerCase() === name);
-        if (existing) return false;
-        const displayName = username.trim();
-        const savedPoints = userPointsMap.get(name) || 0;
-        const newId = Date.now() + Math.random();
-        const newParticipant = { name: displayName, id: newId, team: team.toUpperCase(), points: savedPoints };
-        participants.push(newParticipant);
-        participantsMap.set(newId, newParticipant);
-        joinedUsers.add(name);
-        scheduleRender();
-        saveState();
-        sendParticipantsToServer();
-        console.log(`Added ${displayName} to Team ${team}`);
-        return true;
-    }
-
-    function givePointsToTeam(team) {
-        const teamMembers = participants.filter(p => p.team === team);
-        if (teamMembers.length === 0) {
-            alert(`No members in Team ${team}. No points given.`);
-            return;
-        }
-        teamMembers.forEach(p => {
-            p.points = (p.points || 0) + 1;
-        });
-        scheduleRender();
-        saveState();
-        sendParticipantsToServer();
-        gameMessageSpan.innerText = `Added 1 point to all ${teamMembers.length} members of Team ${team}!`;
-        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 3000);
-    }
-
-    // ========== FIXED: handleChatMessage always logs and processes commands ==========
-    function handleChatMessage(username, content) {
-        if (!username || !content) return;
-        // Always log every chat message
-        addChatMessage(username, content);
-        console.log(`[CHAT] ${username}: ${content}`);
-        
-        // Process joining commands
-        const cmd = content.trim().toLowerCase();
-        if (cmd === '!a' || cmd === '!join a') {
-            addParticipantToTeam(username, 'A');
-        } else if (cmd === '!b' || cmd === '!join b') {
-            addParticipantToTeam(username, 'B');
-        }
-    }
-
-    // ========== PROVIDER FILTERS ==========
-    const topProviderList = [
-        "Pragmatic Play", "Titan Gaming", "Twist Gaming", "Uppercut Gaming",
-        "BGaming", "Hacksaw Gaming", "Backseat Gaming", "Donut Gaming",
-        "Unchained", "Colorful Play", "Paperclip Gaming", "Valkyrie", "Massive Studios"
-    ];
-
-    function saveFilterState() {
-        if (!isLoggedIn || !currentChannel) return;
-        localStorage.setItem(getStorageKey('slotWarFilterState'), JSON.stringify({
-            selectedProviders: Array.from(selectedProviders),
-            providerSearchTerm: providerSearchTerm
-        }));
-    }
-
-    function loadFilterState() {
-        const saved = localStorage.getItem(getStorageKey('slotWarFilterState'));
-        if (saved) {
-            try {
-                const s = JSON.parse(saved);
-                if (s.selectedProviders) selectedProviders = new Set(s.selectedProviders);
-                if (s.providerSearchTerm) providerSearchTerm = s.providerSearchTerm;
-                if (document.getElementById('filterSearch')) {
-                    document.getElementById('filterSearch').value = providerSearchTerm || '';
-                }
-            } catch(e) { console.warn(e); }
-        }
-    }
-
-    function toggleTopProvider(providerName) {
-        if (selectedProviders.has(providerName)) {
-            selectedProviders.delete(providerName);
-        } else {
-            selectedProviders.add(providerName);
-        }
-        renderProviderFilterList();
-        updateSlotDropdowns();
-        saveFilterState();
-        updateTopProviderButtonsHighlight();
-    }
-
-    function selectAllProviders() {
-        const allProviders = [...new Set(slotData.map(slot => slot.provider))];
-        selectedProviders.clear();
-        allProviders.forEach(p => selectedProviders.add(p));
-        renderProviderFilterList();
-        updateSlotDropdowns();
-        saveFilterState();
-        updateTopProviderButtonsHighlight();
-    }
-
-    function updateTopProviderButtonsHighlight() {
-        const container = document.getElementById('topProvidersContainer');
-        if (!container) return;
-        const buttons = container.querySelectorAll('.top-provider-btn');
-        buttons.forEach(btn => {
-            const prov = btn.getAttribute('data-provider');
-            if (selectedProviders.has(prov)) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-
-    function buildProviderFilters() {
-        let providers = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
-        selectedProviders.forEach(p => { if (!providers.includes(p)) selectedProviders.delete(p); });
-        if (selectedProviders.size === 0) {
-            providers.forEach(p => selectedProviders.add(p));
-        }
-        renderProviderFilterList();
-        buildTopProvidersButtons();
-    }
-
-    function buildTopProvidersButtons() {
-        const container = document.getElementById('topProvidersContainer');
-        if (!container) return;
-        container.innerHTML = '';
-        topProviderList.forEach(provider => {
-            const btn = document.createElement('button');
-            btn.textContent = provider;
-            btn.classList.add('top-provider-btn');
-            btn.setAttribute('data-provider', provider);
-            if (selectedProviders.has(provider)) {
-                btn.classList.add('active');
-            }
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                toggleTopProvider(provider);
-            });
-            container.appendChild(btn);
-        });
-        const allBtn = document.createElement('button');
-        allBtn.textContent = 'All';
-        allBtn.classList.add('all-providers');
-        allBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            selectAllProviders();
-        });
-        container.appendChild(allBtn);
-    }
-
-    function renderProviderFilterList() {
-        const container = document.getElementById('providerFilterList');
-        if (!container) return;
-        const allProviders = [...new Set(slotData.map(slot => slot.provider))].sort((a,b) => a.localeCompare(b));
-        let filtered = allProviders;
-        if (providerSearchTerm) {
-            filtered = filtered.filter(p => p.toLowerCase().includes(providerSearchTerm.toLowerCase()));
-        }
-        const topProviders = filtered.filter(p => topProviderList.includes(p));
-        const otherProviders = filtered.filter(p => !topProviderList.includes(p));
-
-        container.innerHTML = '';
-
-        if (topProviders.length > 0) {
-            const topTitle = document.createElement('div');
-            topTitle.className = 'filter-section-title';
-            topTitle.textContent = '⭐ Top Providers';
-            container.appendChild(topTitle);
-            topProviders.forEach(provider => {
-                const slotCount = slotData.filter(slot => slot.provider === provider).length;
-                const div = document.createElement('div');
-                div.className = 'filter-provider';
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.checked = selectedProviders.has(provider);
-                cb.addEventListener('change', (e) => {
-                    if (cb.checked) selectedProviders.add(provider);
-                    else selectedProviders.delete(provider);
-                    renderProviderFilterList();
-                    updateSlotDropdowns();
-                    saveFilterState();
-                    updateTopProviderButtonsHighlight();
-                });
-                const label = document.createElement('label');
-                label.textContent = `${provider} (${slotCount})`;
-                div.appendChild(cb);
-                div.appendChild(label);
-                container.appendChild(div);
-            });
+    (function() {
+        // ========== MULTI-CHANNEL SUPPORT ==========
+        let currentChannelKey = '';
+        function getStorageKey(base) {
+            return currentChannelKey ? `${base}_${currentChannelKey}` : base;
         }
 
-        if (otherProviders.length > 0) {
-            const otherTitle = document.createElement('div');
-            otherTitle.className = 'filter-section-title';
-            otherTitle.textContent = '📋 Other Providers';
-            container.appendChild(otherTitle);
-            otherProviders.forEach(provider => {
-                const slotCount = slotData.filter(slot => slot.provider === provider).length;
-                const div = document.createElement('div');
-                div.className = 'filter-provider';
-                const cb = document.createElement('input');
-                cb.type = 'checkbox';
-                cb.checked = selectedProviders.has(provider);
-                cb.addEventListener('change', (e) => {
-                    if (cb.checked) selectedProviders.add(provider);
-                    else selectedProviders.delete(provider);
-                    renderProviderFilterList();
-                    updateSlotDropdowns();
-                    saveFilterState();
-                    updateTopProviderButtonsHighlight();
-                });
-                const label = document.createElement('label');
-                label.textContent = `${provider} (${slotCount})`;
-                div.appendChild(cb);
-                div.appendChild(label);
-                container.appendChild(div);
-            });
-        }
+        // ========== GLOBAL CHAT LOG & WINNER HISTORY ==========
+        let fullChatLog = [];
+        let winnerHistory = [];
+        const MAX_CHAT_LOG = 200;
+        const MAX_WINNERS = 20;
 
-        if (filtered.length === 0) {
-            const empty = document.createElement('div');
-            empty.textContent = 'No providers match your search';
-            empty.style.color = '#aaa';
-            empty.style.padding = '12px';
-            empty.style.textAlign = 'center';
-            container.appendChild(empty);
-        }
-    }
-
-    function updateSlotDropdowns() {
-        if (!slotData.length) return;
-        let filteredSlots = slotData.filter(slot => selectedProviders.has(slot.provider));
-        filteredSlots.sort((a,b) => a.name.localeCompare(b.name));
-        const groups = {};
-        filteredSlots.forEach(slot => {
-            if (!groups[slot.provider]) groups[slot.provider] = [];
-            groups[slot.provider].push(slot);
-        });
-        const sortedProviders = Object.keys(groups).sort((a,b) => a.localeCompare(b));
-        for (const select of [slotASelect, slotBSelect]) {
-            const currentA = selectedSlotA?.name;
-            const currentB = selectedSlotB?.name;
-            select.innerHTML = '';
-            for (const provider of sortedProviders) {
-                const group = document.createElement('optgroup');
-                group.label = provider;
-                groups[provider].forEach(slot => {
-                    const option = document.createElement('option');
-                    option.value = slot.name;
-                    option.textContent = slot.name;
-                    group.appendChild(option);
-                });
-                select.appendChild(group);
-            }
-            if (filteredSlots.length) {
-                const prevName = select.id === 'slotASelect' ? currentA : currentB;
-                if (prevName && filteredSlots.some(s => s.name === prevName)) {
-                    select.value = prevName;
-                } else {
-                    select.value = filteredSlots[0].name;
-                }
-            }
-        }
-        selectedSlotA = getSelectedSlot('A');
-        selectedSlotB = getSelectedSlot('B');
-        updateSlotPreview('A', selectedSlotA);
-        updateSlotPreview('B', selectedSlotB);
-        updateSlotNameDisplay();
-        sendSlotsToServer();
-    }
-
-    document.getElementById('filterSearch')?.addEventListener('input', (e) => {
-        providerSearchTerm = e.target.value;
-        renderProviderFilterList();
-        saveFilterState();
-    });
-    document.getElementById('selectAllBtn')?.addEventListener('click', () => {
-        const providers = [...new Set(slotData.map(slot => slot.provider))];
-        providers.forEach(p => selectedProviders.add(p));
-        renderProviderFilterList();
-        updateSlotDropdowns();
-        saveFilterState();
-        updateTopProviderButtonsHighlight();
-    });
-    document.getElementById('deselectAllBtn')?.addEventListener('click', () => {
-        selectedProviders.clear();
-        renderProviderFilterList();
-        updateSlotDropdowns();
-        saveFilterState();
-        updateTopProviderButtonsHighlight();
-    });
-    document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
-        providerSearchTerm = '';
-        document.getElementById('filterSearch').value = '';
-        const providers = [...new Set(slotData.map(slot => slot.provider))];
-        providers.forEach(p => selectedProviders.add(p));
-        renderProviderFilterList();
-        updateSlotDropdowns();
-        saveFilterState();
-        updateTopProviderButtonsHighlight();
-    });
-
-    function updateSlotPreview(team, slot) {
-        const previewDiv = team === 'A' ? slotAPreview : slotBPreview;
-        if (!slot) {
-            previewDiv.innerHTML = '';
-            return;
-        }
-        previewDiv.innerHTML = `<img src="${slot.image_url}" style="width:140px;height:196px;object-fit:contain;border-radius:16px;">`;
-        updateSlotNameDisplay();
-    }
-
-    function updateSlotNameDisplay() {
-        if (selectedSlotA) {
-            slotAName.innerHTML = `<div style="font-size:1rem;margin-top:8px;text-align:center;font-weight:600;">${escapeHtml(selectedSlotA.name)}</div>`;
-        } else {
-            slotAName.innerHTML = '';
-        }
-        if (selectedSlotB) {
-            slotBName.innerHTML = `<div style="font-size:1rem;margin-top:8px;text-align:center;font-weight:600;">${escapeHtml(selectedSlotB.name)}</div>`;
-        } else {
-            slotBName.innerHTML = '';
-        }
-    }
-
-    function getSelectedSlot(team) {
-        const select = team === 'A' ? slotASelect : slotBSelect;
-        const name = select.value;
-        return slotData.find(s => s.name === name);
-    }
-
-    slotASelect.addEventListener('change', () => {
-        selectedSlotA = getSelectedSlot('A');
-        updateSlotPreview('A', selectedSlotA);
-        updateSlotNameDisplay();
-        sendSlotsToServer();
-    });
-    slotBSelect.addEventListener('change', () => {
-        selectedSlotB = getSelectedSlot('B');
-        updateSlotPreview('B', selectedSlotB);
-        updateSlotNameDisplay();
-        sendSlotsToServer();
-    });
-
-    // ========== WINNER WHEEL ==========
-    function showWheelOverlay(team, addPoints = false) {
-        let teamMembers = participants.filter(p => p.team === team);
-        if (teamMembers.length === 0) {
-            alert(`No members in Team ${team}. Cannot pick winner.`);
+        // Deduplicate chat messages (prevents duplicates from multiple connections)
+        const processedMessages = new Set();
+        function isDuplicateMessage(username, content) {
+            const key = `${username}|${content}`;
+            if (processedMessages.has(key)) return true;
+            processedMessages.add(key);
+            setTimeout(() => processedMessages.delete(key), 2000);
             return false;
         }
 
-        let shuffled = [...teamMembers];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
-            [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
-        }
+        function addChatMessage(username, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            fullChatLog.unshift({ username, message, timestamp });
+            if (fullChatLog.length > MAX_CHAT_LOG) fullChatLog.pop();
+            updateChatLogPanel();
 
-        let winner = shuffled[0];
-        const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
-        if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) {
-            winner = shuffled[1] || shuffled[0];
-        }
-        const winnerName = winner.name;
-        if (team === 'A') lastWinnerA = winnerName;
-        else lastWinnerB = winnerName;
-
-        const names = teamMembers.map(p => p.name);
-        const overlay = document.createElement('div');
-        overlay.className = 'wheel-overlay';
-        overlay.innerHTML = `
-            <div class="wheel-container">
-                <div class="wheel-title">Picking Winner from Team ${team}</div>
-                <div class="wheel-viewport">
-                    <div id="wheelScroller" class="wheel-scroller"></div>
-                    <div class="wheel-pointer"></div>
-                </div>
-                <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
-                <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
-            </div>`;
-        document.body.appendChild(overlay);
-        const scroller = document.getElementById('wheelScroller');
-        const repeatFactor = 50;
-        let repeated = [];
-        for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
-        scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
-
-        const firstItem = scroller.querySelector('.wheel-item');
-        const itemHeight = firstItem.getBoundingClientRect().height;
-        const viewportHeight = 200;
-        const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
-        const totalItems = repeated.length;
-
-        let targetIdx = -1;
-        const middleStart = Math.floor(totalItems * 0.3);
-        const middleEnd = Math.floor(totalItems * 0.7);
-        for (let i = middleStart; i < middleEnd; i++) {
-            if (repeated[i] === winnerName) {
-                targetIdx = i;
-                break;
-            }
-        }
-        if (targetIdx === -1) {
-            for (let i = 0; i < totalItems; i++) {
-                if (repeated[i] === winnerName) {
-                    targetIdx = i;
-                    break;
+            if (currentWinnerOverlay && currentWinnerName && username.toLowerCase() === currentWinnerName.toLowerCase()) {
+                const mainChatDiv = currentWinnerOverlay.querySelector('.winner-main-chat');
+                if (mainChatDiv) {
+                    const newMsgDiv = document.createElement('div');
+                    newMsgDiv.innerHTML = `[${timestamp}] ${escapeHtml(message)}`;
+                    mainChatDiv.appendChild(newMsgDiv);
+                    mainChatDiv.scrollTop = mainChatDiv.scrollHeight;
                 }
             }
         }
-        if (targetIdx === -1) targetIdx = 0;
 
-        let targetOffset = -(targetIdx * itemHeight) + centerOffset;
-        const maxOffset = -(0 * itemHeight) + centerOffset;
-        const minOffset = -((totalItems-1) * itemHeight) + centerOffset;
-        targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
-
-        const duration = 6 + Math.random() * 5;
-        scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
-        scroller.style.transform = `translateY(${targetOffset}px)`;
-
-        const resultDiv = document.getElementById('wheelResult');
-        scroller.addEventListener('transitionend', () => {
-            if (addPoints) {
-                const winnerPlayer = teamMembers.find(p => p.name === winnerName);
-                if (winnerPlayer) {
-                    winnerPlayer.points = (winnerPlayer.points || 0) + 1;
-                    resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)} (+1 point)`;
-                } else {
-                    resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
-                }
-                renderTeams();
-                saveState();
-                sendParticipantsToServer();
-            } else {
-                resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
-            }
-            playWinSound();
-            shootConfetti();
-            const slot = team === 'A' ? selectedSlotA : selectedSlotB;
-            if (slot) {
-                addWinnerToHistory(winnerName, team, slot.name);
-                showWinnerOverlay(winnerName, team, slot);
-            }
-        }, { once: true });
-
-        document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
-        return true;
-    }
-
-    function playWinSound() {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            if (ctx.state === 'suspended') ctx.resume();
-            const now = ctx.currentTime;
-            const o = ctx.createOscillator();
-            const g = ctx.createGain();
-            o.connect(g); g.connect(ctx.destination);
-            o.frequency.value = 880;
-            g.gain.setValueAtTime(0.2, now);
-            g.gain.exponentialRampToValueAtTime(0.00001, now + 0.5);
-            o.start(now); o.stop(now + 0.5);
-        } catch(e) {}
-    }
-
-    function shootConfettiPiece() {
-        const c = document.createElement('div');
-        c.className = 'confetti-piece';
-        c.style.cssText = `left:${Math.random()*window.innerWidth}px;top:-20px;background:hsl(${Math.random()*360},80%,60%);width:${Math.random()*10+4}px;height:${Math.random()*10+4}px;border-radius:${Math.random()>.5?'50%':'0'}`;
-        document.body.appendChild(c);
-        c.animate([{ transform: 'translateY(0px) rotate(0deg)', opacity: 1 }, { transform: `translateY(${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1500 }).onfinish = () => c.remove();
-    }
-    function shootConfetti() { for (let i = 0; i < 80; i++) setTimeout(shootConfettiPiece, i * 15); }
-
-    // ========== FIXED WINNER OVERLAY (only winner's messages, live updates) ==========
-    function showWinnerOverlay(winnerName, team, slot) {
-        if (currentWinnerOverlay) currentWinnerOverlay.remove();
-
-        // Filter only winner's own messages
-        const winnersOwnChat = fullChatLog
-            .filter(entry => entry.username.toLowerCase() === winnerName.toLowerCase())
-            .slice(0, 30)
-            .map(entry => `<div>[${entry.timestamp}] ${escapeHtml(entry.message)}</div>`)
-            .join('');
-        const chatLogHtml = winnersOwnChat.length ? winnersOwnChat : '<div>No recent messages from this winner in the chat log.</div>';
-
-        const overlay = document.createElement('div');
-        overlay.className = 'winner-overlay';
-        overlay.innerHTML = `
-            <div class="winner-card">
-                <h1>WINNER!</h1>
-                <div class="winner-name">${escapeHtml(winnerName)}</div>
-                <div style="font-size:1.2rem;">Team ${team} wins with</div>
-                <div class="winner-slot-img"><img src="${slot.image_url}" style="width:100px;border-radius:12px;"></div>
-                <div>${escapeHtml(slot.name)}</div>
-                <div class="winner-chat-log">
-                    <strong>📝 ${escapeHtml(winnerName)}'s chat messages (last 30)</strong>
-                    <div class="winner-main-chat" style="margin-top: 10px;">${chatLogHtml}</div>
-                </div>
-                <button id="closeWinnerBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Continue</button>
-            </div>`;
-        document.body.appendChild(overlay);
-        currentWinnerOverlay = overlay;
-        currentWinnerName = winnerName;
-        document.getElementById('closeWinnerBtn').addEventListener('click', () => {
-            overlay.remove();
-            currentWinnerOverlay = null;
-            currentWinnerName = null;
-        });
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    }
-
-    givePointsA.addEventListener('click', () => givePointsToTeam('A'));
-    givePointsB.addEventListener('click', () => givePointsToTeam('B'));
-    pickWinnerA.addEventListener('click', () => showWheelOverlay('A', false));
-    pickWinnerB.addEventListener('click', () => showWheelOverlay('B', false));
-    selectSlotsBtn.addEventListener('click', () => {
-        selectedSlotA = getSelectedSlot('A');
-        selectedSlotB = getSelectedSlot('B');
-        updateSlotPreview('A', selectedSlotA);
-        updateSlotPreview('B', selectedSlotB);
-        updateSlotNameDisplay();
-        sendSlotsToServer();
-        if (selectedSlotA && selectedSlotB) {
-            gameMessageSpan.innerText = `Slots selected: ${selectedSlotA.name} vs ${selectedSlotB.name}`;
-        } else {
-            gameMessageSpan.innerText = 'Please select both slots.';
-        }
-    });
-
-    // ========== RANDOM SLOT PICKER ==========
-    let isSpinning = false;
-    let spinInterval = null;
-    function getFilteredSlots() {
-        return slotData.filter(slot => selectedProviders.has(slot.provider));
-    }
-    function startSpinAnimation(team) {
-        if (isSpinning) return;
-        const filtered = getFilteredSlots();
-        if (filtered.length === 0) {
-            gameMessageSpan.innerText = '❌ No slots match the selected filters';
-            return;
-        }
-        isSpinning = true;
-        const targetButton = team === 'A' ? randomForABtn : randomForBBtn;
-        targetButton.disabled = true;
-        randomForABtn.disabled = true;
-        randomForBBtn.disabled = true;
-        let frames = 0;
-        const totalFrames = 30;
-        const frameDelay = 80;
-        const randomIndex = Math.floor(Math.random() * filtered.length);
-        const chosenSlot = filtered[randomIndex];
-        randomSlotResultImg.style.display = 'block';
-        randomSlotResultImg.style.transition = 'transform 0.1s linear';
-        spinInterval = setInterval(() => {
-            if (frames >= totalFrames) {
-                clearInterval(spinInterval);
-                isSpinning = false;
-                randomForABtn.disabled = false;
-                randomForBBtn.disabled = false;
-                targetButton.disabled = false;
-                if (team === 'A') {
-                    selectedSlotA = chosenSlot;
-                    updateSlotPreview('A', selectedSlotA);
-                    slotASelect.value = chosenSlot.name;
-                    updateSlotNameDisplay();
-                    sendSlotsToServer();
-                    gameMessageSpan.innerText = `🎲 Random slot for Team A: ${chosenSlot.name}`;
-                } else {
-                    selectedSlotB = chosenSlot;
-                    updateSlotPreview('B', selectedSlotB);
-                    slotBSelect.value = chosenSlot.name;
-                    updateSlotNameDisplay();
-                    sendSlotsToServer();
-                    gameMessageSpan.innerText = `🎲 Random slot for Team B: ${chosenSlot.name}`;
-                }
-                randomSlotResultImg.src = chosenSlot.image_url;
-                randomSlotResultImg.style.transform = 'rotateY(0deg) scale(1)';
-                randomSlotResultImg.style.transition = 'transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-                randomSlotResultImg.style.transform = 'scale(1.05)';
-                setTimeout(() => { randomSlotResultImg.style.transform = 'scale(1)'; }, 200);
+        function updateChatLogPanel() {
+            const panel = document.getElementById('chatLogPanel');
+            if (!panel) return;
+            if (fullChatLog.length === 0) {
+                panel.innerHTML = 'Waiting for messages...';
                 return;
             }
-            const tempSlot = filtered[Math.floor(Math.random() * filtered.length)];
-            randomSlotResultImg.src = tempSlot.image_url;
-            const rotation = frames * 22;
-            const scale = 1 + Math.sin(frames * 0.8) * 0.05;
-            randomSlotResultImg.style.transform = `rotateY(${rotation}deg) scale(${scale})`;
-            frames++;
-        }, frameDelay);
-    }
-    randomForABtn.addEventListener('click', () => startSpinAnimation('A'));
-    randomForBBtn.addEventListener('click', () => startSpinAnimation('B'));
-
-    // ========== CHAT CONNECTION ==========
-    async function resolveKickChatroomId(channelName) {
-        try {
-            const res = await fetch(`/api/kick/channel/${encodeURIComponent(channelName)}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            const id = data?.chatroom?.id || data?.data?.chatroom?.id || data?.chatroom_id;
-            if (id) return id;
-            throw new Error('No chatroom id');
-        } catch (err) {
-            console.error('Proxy resolve error:', err);
-            throw new Error('Unable to resolve Kick chatroom ID');
+            panel.innerHTML = fullChatLog.map(entry => 
+                `<div>[${entry.timestamp}] <strong>${escapeHtml(entry.username)}</strong>: ${escapeHtml(entry.message)}</div>`
+            ).join('');
+            panel.scrollTop = 0;
         }
-    }
 
-    function stopKickBrowserChat() {
-        if (reconnectTimer) clearTimeout(reconnectTimer);
-        reconnectAttempt = 0;
-        if (kickBrowserSocket) {
-            try { kickBrowserSocket.close(); } catch(e) {}
-            kickBrowserSocket = null;
-        }
-    }
-
-    async function startKickBrowserChat(channelName) {
-        stopKickBrowserChat();
-        if (manualDisconnect) return;
-        try {
-            setConnectionStatus(`Resolving channel ${channelName}...`, 'connected');
-            const chatroomId = await resolveKickChatroomId(channelName);
-            setConnectionStatus(`Connecting to ${channelName} chat...`, 'connected');
-            const pusherUrl = 'wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false';
-            const wsChat = new WebSocket(pusherUrl);
-            wsChat.addEventListener('open', () => {
-                wsChat.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: `chatrooms.${chatroomId}.v2` } }));
-                setConnectionStatus(`Listening to ${channelName}`, 'connected');
-                gameMessageSpan.innerText = `Listening for !A and !B in #${channelName}`;
-                reconnectAttempt = 0;
-            });
-            wsChat.addEventListener('message', (event) => {
-                try {
-                    const msg = JSON.parse(event.data);
-                    if (msg.event === 'App\\Events\\ChatMessageEvent') {
-                        const td = JSON.parse(msg.data);
-                        handleChatMessage(td?.sender?.username, td?.content?.trim());
-                    }
-                } catch(e) {}
-            });
-            wsChat.addEventListener('close', () => {
-                setConnectionStatus(`Disconnected from ${channelName}`, 'failed');
-                if (!manualDisconnect && currentChannel && isLoggedIn) {
-                    const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempt), 30000);
-                    reconnectAttempt++;
-                    setConnectionStatus(`Reconnecting in ${Math.round(delay/1000)}s...`, 'reconnecting');
-                    reconnectTimer = setTimeout(() => startKickBrowserChat(currentChannel), delay);
-                }
-            });
-            wsChat.addEventListener('error', (error) => {
-                console.error('WebSocket error:', error);
-                setConnectionStatus('Kick chat error', 'failed');
-                if (!manualDisconnect && currentChannel && isLoggedIn) {
-                    const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempt), 30000);
-                    reconnectAttempt++;
-                    setConnectionStatus(`Reconnecting in ${Math.round(delay/1000)}s...`, 'reconnecting');
-                    reconnectTimer = setTimeout(() => startKickBrowserChat(currentChannel), delay);
-                }
-            });
-            kickBrowserSocket = wsChat;
-            currentChannel = channelName;
-            currentChannelKey = channelName;
-            saveState();
-        } catch (err) {
-            setConnectionStatus(`${err.message}`, 'failed');
-            gameMessageSpan.innerText = err.message;
-        }
-    }
-
-    function setConnectionStatus(message, status) {
-        statusDisplay.innerHTML = message;
-        statusDisplay.className = 'connection-status';
-    }
-
-    let saveTimeout = null;
-    function saveState() {
-        if (!isLoggedIn || !currentChannel) return;
-        if (saveTimeout) clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(() => {
-            localStorage.setItem(getStorageKey('slotWarState'), JSON.stringify({
-                participants, joiningOpen, selectedSlotA: selectedSlotA?.name, selectedSlotB: selectedSlotB?.name,
-                kickToken, currentChannel, isLoggedIn, joinedUsers: Array.from(joinedUsers),
-                lastWinnerA, lastWinnerB, winnerHistory
-            }));
-            saveFilterState();
-            saveTimeout = null;
-        }, 500);
-    }
-
-    function loadState() {
-        const saved = localStorage.getItem(getStorageKey('slotWarState'));
-        if (!saved) return;
-        try {
-            const s = JSON.parse(saved);
-            if (!s.isLoggedIn || !s.currentChannel) return;
-            participants = s.participants || [];
-            participants.forEach(p => participantsMap.set(p.id, p));
-            joiningOpen = s.joiningOpen !== false;
-            if (s.selectedSlotA) selectedSlotA = slotData.find(sl => sl.name === s.selectedSlotA);
-            if (s.selectedSlotB) selectedSlotB = slotData.find(sl => sl.name === s.selectedSlotB);
-            kickToken = s.kickToken;
-            currentChannel = s.currentChannel;
-            currentChannelKey = currentChannel;
-            isLoggedIn = s.isLoggedIn;
-            if (s.joinedUsers) joinedUsers = new Set(s.joinedUsers);
-            if (s.lastWinnerA) lastWinnerA = s.lastWinnerA;
-            if (s.lastWinnerB) lastWinnerB = s.lastWinnerB;
-            if (s.winnerHistory) winnerHistory = s.winnerHistory;
+        function addWinnerToHistory(winnerName, team, slotName) {
+            const timestamp = new Date().toLocaleString();
+            winnerHistory.unshift({ timestamp, winnerName, team, slotName });
+            if (winnerHistory.length > MAX_WINNERS) winnerHistory.pop();
             updateWinnerHistoryPanel();
-            if (currentChannel) channelNameInput.value = currentChannel;
-            if (isLoggedIn && currentChannel) {
-                userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
-                setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
-                loginBtn.textContent = 'Disconnect';
-                startKickBrowserChat(currentChannel);
-            }
-            renderTeams();
-            if (selectedSlotA) updateSlotPreview('A', selectedSlotA);
-            if (selectedSlotB) updateSlotPreview('B', selectedSlotB);
-            if (slotASelect && selectedSlotA) slotASelect.value = selectedSlotA.name;
-            if (slotBSelect && selectedSlotB) slotBSelect.value = selectedSlotB.name;
-            updateSlotNameDisplay();
-            sendParticipantsToServer();
-            sendSlotsToServer();
-        } catch(e) { console.warn(e); }
-    }
-
-    // ========== MANUAL ADD HANDLERS (no test users) ==========
-    manualAddA.addEventListener('click', () => {
-        let name = manualUsername.value.trim();
-        if (!name) {
-            alert("Please enter a username first.");
-            return;
-        }
-        addParticipantToTeam(name, 'A');
-        manualUsername.value = '';
-    });
-    manualAddB.addEventListener('click', () => {
-        let name = manualUsername.value.trim();
-        if (!name) {
-            alert("Please enter a username first.");
-            return;
-        }
-        addParticipantToTeam(name, 'B');
-        manualUsername.value = '';
-    });
-
-    openJoiningBtn.addEventListener('click', () => {
-        joiningOpen = true;
-        openJoiningBtn.classList.add('joining-open');
-        closeJoiningBtn.classList.remove('joining-closed');
-        saveState();
-        gameMessageSpan.innerText = 'Joining is OPEN';
-        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
-    });
-    closeJoiningBtn.addEventListener('click', () => {
-        joiningOpen = false;
-        closeJoiningBtn.classList.add('joining-closed');
-        openJoiningBtn.classList.remove('joining-open');
-        saveState();
-        gameMessageSpan.innerText = 'Joining is CLOSED';
-        setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
-    });
-    if (joiningOpen) openJoiningBtn.classList.add('joining-open');
-    else closeJoiningBtn.classList.add('joining-closed');
-
-    let userPointsMap = new Map();
-    function clearAllTeams() {
-        if (confirm("Clear all teams? Points will be preserved.")) {
-            participants = [];
-            participantsMap.clear();
-            joinedUsers.clear();
-            renderTeams();
-            saveState();
-            sendParticipantsToServer();
-            gameMessageSpan.innerText = 'Teams cleared. Points preserved.';
-            setTimeout(() => gameMessageSpan.innerText = 'Ready.', 2000);
-        }
-    }
-    clearTeamsBtn.addEventListener('click', clearAllTeams);
-    
-    // FIXED: Hard reset that clears ALL localStorage and reloads the page
-    resetGameBtn.addEventListener('click', () => {
-        if (confirm("⚠️ HARD RESET ⚠️\n\nThis will clear ALL teams, points, winners, filters, and saved data.\nThe page will reload to start completely fresh.\n\nAre you sure?")) {
-            // Clear all localStorage for this channel
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && (key.includes('slotWar') || key.includes('aceRace') || key.includes('userPoints'))) {
-                    keysToRemove.push(key);
-                }
-            }
-            keysToRemove.forEach(key => localStorage.removeItem(key));
-            
-            // Also clear any remaining specific keys
-            localStorage.removeItem(getStorageKey('slotWarState'));
-            localStorage.removeItem(getStorageKey('slotWarFilterState'));
-            localStorage.removeItem(getStorageKey('slotWarUserPoints'));
-            
-            // Reload the page to start fresh
-            location.reload();
-        }
-    });
-
-    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m] || m); }
-
-    // ========== IFRAME / STANDALONE AUTH ==========
-    let isIframe = window.parent !== window;
-    function handleTokenFromParent(event) {
-        if (event.data.type === 'KICK_TOKEN') {
-            kickToken = event.data.token;
-            currentChannel = event.data.channel;
-            currentChannelKey = currentChannel;
-            if (currentChannel) {
-                userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
-                setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
-                loginBtn.textContent = 'Disconnect';
-                startKickBrowserChat(currentChannel);
-            } else {
-                userInfoArea.innerHTML = `<div>Logged in to Kick. Enter a channel to connect.</div>`;
-                setConnectionStatus('Logged in to Kick', 'connected');
-            }
-            isLoggedIn = true;
             saveState();
         }
-    }
-    if (isIframe) {
-        window.addEventListener('message', handleTokenFromParent);
-        window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
-    }
-    if (!isIframe) {
-        loginBtn.addEventListener('click', () => {
-            if (isLoggedIn) {
-                manualDisconnect = true;
-                if (reconnectTimer) clearTimeout(reconnectTimer);
-                isLoggedIn = false; kickToken = null; currentChannel = null; currentChannelKey = '';
-                userInfoArea.innerHTML = '';
-                setConnectionStatus('Not logged in', 'disconnected');
-                loginBtn.textContent = 'Login with Kick';
-                participants = [];
-                participantsMap.clear();
-                joinedUsers.clear();
-                renderTeams();
-                stopKickBrowserChat();
-                localStorage.removeItem(getStorageKey('slotWarState'));
-                sendParticipantsToServer();
-                sendSlotsToServer();
+
+        function updateWinnerHistoryPanel() {
+            const panel = document.getElementById('winnerHistoryPanel');
+            if (!panel) return;
+            if (winnerHistory.length === 0) {
+                panel.innerHTML = 'No winners yet';
                 return;
             }
-            manualDisconnect = false;
-            window.open('/auth/kick', 'KickLogin', 'width=600,height=700');
-        });
-        window.addEventListener('message', (event) => {
-            if (event.data.type === 'KICK_TOKEN') {
-                manualDisconnect = false;
-                kickToken = event.data.token;
-                currentChannel = event.data.channel;
-                currentChannelKey = currentChannel;
-                participants = [];
-                participantsMap.clear();
-                joinedUsers.clear();
-                renderTeams();
-                if (currentChannel) {
-                    userInfoArea.innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
-                    setConnectionStatus(`Logged in as ${currentChannel}`, 'connected');
-                    gameMessageSpan.innerText = `Connected to ${currentChannel} chat. Waiting for messages...`;
-                    startKickBrowserChat(currentChannel);
-                } else {
-                    userInfoArea.innerHTML = `<div>Logged in to Kick. Enter a channel to connect.</div>`;
-                    setConnectionStatus('Logged in to Kick', 'connected');
-                }
-                loginBtn.textContent = 'Disconnect';
-                isLoggedIn = true;
-                localStorage.removeItem(getStorageKey('slotWarState'));
-                saveState();
-            }
-        });
-    }
-    connectChannelBtn.addEventListener('click', () => {
-        if (!isLoggedIn) { alert('Please log in first.'); return; }
-        const channel = channelNameInput.value.trim();
-        if (!channel) { alert('Enter a channel name.'); return; }
-        currentChannel = channel;
-        currentChannelKey = channel;
-        manualDisconnect = false;
-        startKickBrowserChat(currentChannel);
-        saveState();
-    });
+            panel.innerHTML = winnerHistory.map(entry => 
+                `<div class="winner-entry">🏆 [${entry.timestamp}] ${escapeHtml(entry.winnerName)} (Team ${entry.team}) – ${escapeHtml(entry.slotName)}</div>`
+            ).join('');
+            panel.scrollTop = 0;
+        }
 
-    connectWebSocket();
-    loadSlotData().then(() => {
-        loadState();
-        const savedMap = localStorage.getItem(getStorageKey('slotWarUserPoints'));
-        if (savedMap) {
+        // ========== LOAD SLOT DATA ==========
+        let slotData = [];
+        async function loadSlotData() {
             try {
-                const parsed = JSON.parse(savedMap);
-                userPointsMap = new Map(parsed);
+                const res = await fetch('/slots.json');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                slotData = await res.json();
+                console.log(`Loaded ${slotData.length} slots`);
+                loadFilterState();
+                buildProviderFilters();
+                updateSlotDropdowns();
+                if (slotData.length) {
+                    selectedSlotA = slotData[0];
+                    selectedSlotB = slotData[0];
+                    updateSlotPreview('A', selectedSlotA);
+                    updateSlotPreview('B', selectedSlotB);
+                    slotASelect.value = slotData[0].name;
+                    slotBSelect.value = slotData[0].name;
+                    updateSlotNameDisplay();
+                    sendSlotsToServer();
+                }
+            } catch (err) {
+                console.error('Failed to load slots.json:', err);
+            }
+        }
+
+        // ========== GLOBAL STATE ==========
+        let participants = [];
+        let participantsMap = new Map();
+        let joinedUsers = new Set();
+        let joiningOpen = true;
+        let selectedSlotA = null;
+        let selectedSlotB = null;
+        let kickBrowserSocket = null;
+        let currentChannel = null;
+        let reconnectTimer = null;
+        let reconnectAttempt = 0;
+        let manualDisconnect = false;
+        let currentWinnerOverlay = null;
+        let currentWinnerName = null;
+
+        let selectedProviders = new Set();
+        let providerSearchTerm = '';
+
+        let lastWinnerA = null;
+        let lastWinnerB = null;
+
+        const openJoiningBtn = document.getElementById('openJoiningBtn');
+        const closeJoiningBtn = document.getElementById('closeJoiningBtn');
+        const clearTeamsBtn = document.getElementById('clearTeamsBtn');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+        const givePointsA = document.getElementById('givePointsA');
+        const givePointsB = document.getElementById('givePointsB');
+        const pickWinnerA = document.getElementById('pickWinnerA');
+        const pickWinnerB = document.getElementById('pickWinnerB');
+        const selectSlotsBtn = document.getElementById('selectSlotsBtn');
+        const slotASelect = document.getElementById('slotASelect');
+        const slotBSelect = document.getElementById('slotBSelect');
+        const slotAPreview = document.getElementById('slotAPreview');
+        const slotBPreview = document.getElementById('slotBPreview');
+        const slotAName = document.getElementById('slotAName');
+        const slotBName = document.getElementById('slotBName');
+        const manualUsername = document.getElementById('manualUsername');
+        const manualAddA = document.getElementById('manualAddA');
+        const manualAddB = document.getElementById('manualAddB');
+        const randomForABtn = document.getElementById('randomForA');
+        const randomForBBtn = document.getElementById('randomForB');
+        const randomSlotResultImg = document.getElementById('randomSlotResultImg');
+        const gameMessageSpan = document.createElement('div'); gameMessageSpan.style.display = 'none';
+
+        // ========== WEBSOCKET SYNC ==========
+        let ws = null;
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}`;
+            ws = new WebSocket(wsUrl);
+            ws.onopen = () => {
+                console.log('Game WebSocket connected');
+                if (currentChannel) {
+                    ws.send(JSON.stringify({ type: 'joinRoom', room: currentChannel }));
+                }
+                sendParticipantsToServer();
+                sendSlotsToServer();
+            };
+            ws.onmessage = (event) => {
+                try {
+                    const { type, data, room } = JSON.parse(event.data);
+                    if (room && room !== currentChannel) return;
+                    if (type === 'participants') {
+                        const newStr = JSON.stringify(data);
+                        const oldStr = JSON.stringify(participants);
+                        if (newStr !== oldStr) {
+                            participants = data;
+                            participantsMap.clear();
+                            participants.forEach(p => participantsMap.set(p.id, p));
+                            joinedUsers.clear();
+                            participants.forEach(p => joinedUsers.add(p.name.toLowerCase()));
+                            scheduleRender();
+                            saveState();
+                        }
+                    } else if (type === 'slots') {
+                        if (data.teamA && data.teamA !== selectedSlotA) {
+                            selectedSlotA = data.teamA;
+                            updateSlotPreview('A', selectedSlotA);
+                            if (slotASelect && selectedSlotA) slotASelect.value = selectedSlotA.name;
+                        }
+                        if (data.teamB && data.teamB !== selectedSlotB) {
+                            selectedSlotB = data.teamB;
+                            updateSlotPreview('B', selectedSlotB);
+                            if (slotBSelect && selectedSlotB) slotBSelect.value = selectedSlotB.name;
+                        }
+                        updateSlotNameDisplay();
+                    }
+                } catch(e) { console.warn(e); }
+            };
+            ws.onclose = () => setTimeout(connectWebSocket, 1000);
+        }
+
+        function sendParticipantsToServer() {
+            if (ws && ws.readyState === WebSocket.OPEN && currentChannel) {
+                ws.send(JSON.stringify({ type: 'updateParticipants', data: participants, room: currentChannel }));
+            }
+        }
+
+        function sendSlotsToServer() {
+            if (ws && ws.readyState === WebSocket.OPEN && currentChannel) {
+                ws.send(JSON.stringify({ type: 'updateSlots', data: { teamA: selectedSlotA, teamB: selectedSlotB }, room: currentChannel }));
+            }
+        }
+
+        // ========== RENDER TEAMS ==========
+        let renderScheduled = false;
+        function scheduleRender() {
+            if (renderScheduled) return;
+            renderScheduled = true;
+            setTimeout(() => {
+                renderTeams();
+                renderScheduled = false;
+            }, 50);
+        }
+
+        function renderTeams() {
+            const teamAList = document.getElementById('teamAList');
+            const teamBList = document.getElementById('teamBList');
+            teamAList.innerHTML = '';
+            teamBList.innerHTML = '';
+            let aCount = 0, bCount = 0;
+            const sorted = [...participants].sort((a,b) => a.name.localeCompare(b.name));
+            sorted.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'team-item';
+                div.innerHTML = `<span class="team-name">${escapeHtml(p.name)} <span class="team-points">${p.points || 0}</span></span><button class="remove-participant" data-id="${p.id}" data-team="${p.team}">X</button>`;
+                if (p.team === 'A') {
+                    teamAList.appendChild(div);
+                    aCount++;
+                } else {
+                    teamBList.appendChild(div);
+                    bCount++;
+                }
+            });
+            document.getElementById('teamACount').innerText = `(${aCount})`;
+            document.getElementById('teamBCount').innerText = `(${bCount})`;
+
+            document.querySelectorAll('.remove-participant').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseFloat(btn.getAttribute('data-id'));
+                    participants = participants.filter(p => p.id !== id);
+                    participantsMap.delete(id);
+                    renderTeams();
+                    saveState();
+                    sendParticipantsToServer();
+                });
+            });
+        }
+
+        function addParticipantToTeam(username, team) {
+            if (!joiningOpen) return false;
+            if (!username || !team) return false;
+            const name = username.trim().toLowerCase();
+            if (joinedUsers.has(name)) return false;
+            if (participants.find(p => p.name.toLowerCase() === name)) return false;
+            const displayName = username.trim();
+            const savedPoints = userPointsMap.get(name) || 0;
+            const newId = Date.now() + Math.random();
+            participants.push({ name: displayName, id: newId, team: team.toUpperCase(), points: savedPoints });
+            participantsMap.set(newId, participants[participants.length-1]);
+            joinedUsers.add(name);
+            scheduleRender();
+            saveState();
+            sendParticipantsToServer();
+            return true;
+        }
+
+        function givePointsToTeam(team) {
+            const teamMembers = participants.filter(p => p.team === team);
+            if (teamMembers.length === 0) {
+                alert(`No members in Team ${team}. No points given.`);
+                return;
+            }
+            teamMembers.forEach(p => { p.points = (p.points || 0) + 1; });
+            scheduleRender();
+            saveState();
+            sendParticipantsToServer();
+        }
+
+        // ========== CHAT HANDLER with deduplication ==========
+        function handleChatMessage(username, content) {
+            if (!username || !content) return;
+            if (isDuplicateMessage(username, content)) return;
+            addChatMessage(username, content);
+            const cmd = content.trim().toLowerCase();
+            if (cmd === '!a' || cmd === '!join a') addParticipantToTeam(username, 'A');
+            else if (cmd === '!b' || cmd === '!join b') addParticipantToTeam(username, 'B');
+        }
+
+        // ========== KICK CHAT CONNECTION ==========
+        async function resolveKickChatroomId(channelName) {
+            try {
+                const res = await fetch(`/api/kick/channel/${encodeURIComponent(channelName)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                return data?.chatroom?.id || data?.data?.chatroom?.id || data?.chatroom_id;
+            } catch(e) { throw new Error('Unable to resolve Kick chatroom ID'); }
+        }
+
+        function stopKickBrowserChat() {
+            if (reconnectTimer) clearTimeout(reconnectTimer);
+            reconnectAttempt = 0;
+            if (kickBrowserSocket) { try { kickBrowserSocket.close(); } catch(e) {} kickBrowserSocket = null; }
+        }
+
+        async function startKickBrowserChat(channelName) {
+            stopKickBrowserChat();
+            if (manualDisconnect) return;
+            try {
+                const chatroomId = await resolveKickChatroomId(channelName);
+                const pusherUrl = 'wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false';
+                const wsChat = new WebSocket(pusherUrl);
+                wsChat.addEventListener('open', () => {
+                    wsChat.send(JSON.stringify({ event: 'pusher:subscribe', data: { auth: '', channel: `chatrooms.${chatroomId}.v2` } }));
+                    reconnectAttempt = 0;
+                });
+                wsChat.addEventListener('message', (event) => {
+                    try {
+                        const msg = JSON.parse(event.data);
+                        if (msg.event === 'App\\Events\\ChatMessageEvent') {
+                            const td = JSON.parse(msg.data);
+                            handleChatMessage(td?.sender?.username, td?.content?.trim());
+                        }
+                    } catch(e) {}
+                });
+                wsChat.addEventListener('close', () => {
+                    if (!manualDisconnect && currentChannel) {
+                        const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempt), 30000);
+                        reconnectAttempt++;
+                        reconnectTimer = setTimeout(() => startKickBrowserChat(currentChannel), delay);
+                    }
+                });
+                kickBrowserSocket = wsChat;
+                currentChannel = channelName;
+                currentChannelKey = channelName;
+                saveState();
+            } catch(err) { console.error(err); }
+        }
+
+        // ========== PROVIDER FILTERS (full) ==========
+        const topProviderList = [
+            "Pragmatic Play", "Titan Gaming", "Twist Gaming", "Uppercut Gaming",
+            "BGaming", "Hacksaw Gaming", "Backseat Gaming", "Donut Gaming",
+            "Unchained", "Colorful Play", "Paperclip Gaming", "Valkyrie", "Massive Studios"
+        ];
+
+        function saveFilterState() {
+            if (!currentChannel) return;
+            localStorage.setItem(getStorageKey('slotWarFilterState'), JSON.stringify({
+                selectedProviders: Array.from(selectedProviders),
+                providerSearchTerm: providerSearchTerm
+            }));
+        }
+
+        function loadFilterState() {
+            const saved = localStorage.getItem(getStorageKey('slotWarFilterState'));
+            if (saved) {
+                try {
+                    const s = JSON.parse(saved);
+                    if (s.selectedProviders) selectedProviders = new Set(s.selectedProviders);
+                    if (s.providerSearchTerm) providerSearchTerm = s.providerSearchTerm;
+                    document.getElementById('filterSearch').value = providerSearchTerm || '';
+                } catch(e) {}
+            }
+        }
+
+        function renderProviderFilterList() {
+            const container = document.getElementById('providerFilterList');
+            if (!container) return;
+            const allProviders = [...new Set(slotData.map(slot => slot.provider))].sort();
+            let filtered = allProviders;
+            if (providerSearchTerm) filtered = filtered.filter(p => p.toLowerCase().includes(providerSearchTerm.toLowerCase()));
+            container.innerHTML = '';
+            filtered.forEach(provider => {
+                const slotCount = slotData.filter(slot => slot.provider === provider).length;
+                const div = document.createElement('div');
+                div.className = 'filter-provider';
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = selectedProviders.has(provider);
+                cb.addEventListener('change', () => {
+                    if (cb.checked) selectedProviders.add(provider);
+                    else selectedProviders.delete(provider);
+                    renderProviderFilterList();
+                    updateSlotDropdowns();
+                    saveFilterState();
+                    updateTopProviderButtonsHighlight();
+                });
+                const label = document.createElement('label');
+                label.textContent = `${provider} (${slotCount})`;
+                div.appendChild(cb);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        function buildTopProvidersButtons() {
+            const container = document.getElementById('topProvidersContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            topProviderList.forEach(provider => {
+                const btn = document.createElement('button');
+                btn.textContent = provider;
+                btn.classList.add('top-provider-btn');
+                if (selectedProviders.has(provider)) btn.classList.add('active');
+                btn.addEventListener('click', () => {
+                    if (selectedProviders.has(provider)) selectedProviders.delete(provider);
+                    else selectedProviders.add(provider);
+                    renderProviderFilterList();
+                    updateSlotDropdowns();
+                    saveFilterState();
+                    updateTopProviderButtonsHighlight();
+                });
+                container.appendChild(btn);
+            });
+            const allBtn = document.createElement('button');
+            allBtn.textContent = 'All';
+            allBtn.classList.add('all-providers');
+            allBtn.addEventListener('click', () => {
+                const all = [...new Set(slotData.map(slot => slot.provider))];
+                all.forEach(p => selectedProviders.add(p));
+                renderProviderFilterList();
+                updateSlotDropdowns();
+                saveFilterState();
+                updateTopProviderButtonsHighlight();
+            });
+            container.appendChild(allBtn);
+        }
+
+        function updateTopProviderButtonsHighlight() {
+            document.querySelectorAll('.top-provider-btn').forEach(btn => {
+                const prov = btn.textContent;
+                if (selectedProviders.has(prov)) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function buildProviderFilters() {
+            renderProviderFilterList();
+            buildTopProvidersButtons();
+        }
+
+        function updateSlotDropdowns() {
+            if (!slotData.length) return;
+            let filteredSlots = slotData.filter(slot => selectedProviders.has(slot.provider));
+            filteredSlots.sort((a,b) => a.name.localeCompare(b.name));
+            const groups = {};
+            filteredSlots.forEach(slot => { if (!groups[slot.provider]) groups[slot.provider] = []; groups[slot.provider].push(slot); });
+            const sortedProviders = Object.keys(groups).sort();
+            for (const select of [slotASelect, slotBSelect]) {
+                const currentA = selectedSlotA?.name;
+                const currentB = selectedSlotB?.name;
+                select.innerHTML = '';
+                for (const provider of sortedProviders) {
+                    const group = document.createElement('optgroup');
+                    group.label = provider;
+                    groups[provider].forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.name;
+                        option.textContent = slot.name;
+                        group.appendChild(option);
+                    });
+                    select.appendChild(group);
+                }
+                if (filteredSlots.length) {
+                    const prevName = select.id === 'slotASelect' ? currentA : currentB;
+                    if (prevName && filteredSlots.some(s => s.name === prevName)) select.value = prevName;
+                    else select.value = filteredSlots[0].name;
+                }
+            }
+            selectedSlotA = getSelectedSlot('A');
+            selectedSlotB = getSelectedSlot('B');
+            updateSlotPreview('A', selectedSlotA);
+            updateSlotPreview('B', selectedSlotB);
+            updateSlotNameDisplay();
+            sendSlotsToServer();
+        }
+
+        function updateSlotPreview(team, slot) {
+            const previewDiv = team === 'A' ? slotAPreview : slotBPreview;
+            if (!slot) { previewDiv.innerHTML = ''; return; }
+            previewDiv.innerHTML = `<img src="${slot.image_url}" style="width:140px;height:196px;object-fit:contain;border-radius:16px;">`;
+        }
+
+        function updateSlotNameDisplay() {
+            slotAName.innerHTML = selectedSlotA ? `<div style="font-size:1rem;margin-top:8px;text-align:center;font-weight:600;">${escapeHtml(selectedSlotA.name)}</div>` : '';
+            slotBName.innerHTML = selectedSlotB ? `<div style="font-size:1rem;margin-top:8px;text-align:center;font-weight:600;">${escapeHtml(selectedSlotB.name)}</div>` : '';
+        }
+
+        function getSelectedSlot(team) {
+            const select = team === 'A' ? slotASelect : slotBSelect;
+            const name = select.value;
+            return slotData.find(s => s.name === name);
+        }
+
+        slotASelect.addEventListener('change', () => {
+            selectedSlotA = getSelectedSlot('A');
+            updateSlotPreview('A', selectedSlotA);
+            updateSlotNameDisplay();
+            sendSlotsToServer();
+        });
+        slotBSelect.addEventListener('change', () => {
+            selectedSlotB = getSelectedSlot('B');
+            updateSlotPreview('B', selectedSlotB);
+            updateSlotNameDisplay();
+            sendSlotsToServer();
+        });
+        selectSlotsBtn.addEventListener('click', () => {
+            selectedSlotA = getSelectedSlot('A');
+            selectedSlotB = getSelectedSlot('B');
+            updateSlotPreview('A', selectedSlotA);
+            updateSlotPreview('B', selectedSlotB);
+            updateSlotNameDisplay();
+            sendSlotsToServer();
+        });
+
+        document.getElementById('filterSearch')?.addEventListener('input', (e) => {
+            providerSearchTerm = e.target.value;
+            renderProviderFilterList();
+            saveFilterState();
+        });
+        document.getElementById('selectAllBtn')?.addEventListener('click', () => {
+            const allProviders = [...new Set(slotData.map(slot => slot.provider))];
+            allProviders.forEach(p => selectedProviders.add(p));
+            renderProviderFilterList();
+            updateSlotDropdowns();
+            saveFilterState();
+            updateTopProviderButtonsHighlight();
+        });
+        document.getElementById('deselectAllBtn')?.addEventListener('click', () => {
+            selectedProviders.clear();
+            renderProviderFilterList();
+            updateSlotDropdowns();
+            saveFilterState();
+            updateTopProviderButtonsHighlight();
+        });
+        document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
+            providerSearchTerm = '';
+            document.getElementById('filterSearch').value = '';
+            const allProviders = [...new Set(slotData.map(slot => slot.provider))];
+            allProviders.forEach(p => selectedProviders.add(p));
+            renderProviderFilterList();
+            updateSlotDropdowns();
+            saveFilterState();
+            updateTopProviderButtonsHighlight();
+        });
+
+        // ========== WINNER WHEEL ==========
+        function showWheelOverlay(team) {
+            let teamMembers = participants.filter(p => p.team === team);
+            if (teamMembers.length === 0) { alert(`No members in Team ${team}.`); return false; }
+            let shuffled = [...teamMembers];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+                [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+            }
+            let winner = shuffled[0];
+            const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
+            if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) winner = shuffled[1] || shuffled[0];
+            const winnerName = winner.name;
+            if (team === 'A') lastWinnerA = winnerName; else lastWinnerB = winnerName;
+
+            const names = teamMembers.map(p => p.name);
+            const overlay = document.createElement('div');
+            overlay.className = 'wheel-overlay';
+            overlay.innerHTML = `
+                <div class="wheel-container">
+                    <div class="wheel-title">Picking Winner from Team ${team}</div>
+                    <div class="wheel-viewport">
+                        <div id="wheelScroller" class="wheel-scroller"></div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+                    <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
+                    <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
+                </div>`;
+            document.body.appendChild(overlay);
+            const scroller = document.getElementById('wheelScroller');
+            const repeatFactor = 50;
+            let repeated = [];
+            for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
+            scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+            const firstItem = scroller.querySelector('.wheel-item');
+            const itemHeight = firstItem.getBoundingClientRect().height;
+            const viewportHeight = 200;
+            const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+            const totalItems = repeated.length;
+            let targetIdx = -1;
+            for (let i = 0; i < totalItems; i++) { if (repeated[i] === winnerName) { targetIdx = i; break; } }
+            if (targetIdx === -1) targetIdx = 0;
+            let targetOffset = -(targetIdx * itemHeight) + centerOffset;
+            const duration = 6 + Math.random() * 5;
+            scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
+            scroller.style.transform = `translateY(${targetOffset}px)`;
+            const resultDiv = document.getElementById('wheelResult');
+            scroller.addEventListener('transitionend', () => {
+                resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
+                playWinSound();
+                shootConfetti();
+                const slot = team === 'A' ? selectedSlotA : selectedSlotB;
+                if (slot) {
+                    addWinnerToHistory(winnerName, team, slot.name);
+                    showWinnerOverlay(winnerName, team, slot);
+                }
+            }, { once: true });
+            document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
+            return true;
+        }
+
+        function playWinSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                o.frequency.value = 880;
+                g.gain.setValueAtTime(0.2, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
+                o.start(); o.stop(ctx.currentTime + 0.5);
             } catch(e) {}
         }
-    });
-    setInterval(() => {
-        if (isLoggedIn && currentChannel) {
-            localStorage.setItem(getStorageKey('slotWarUserPoints'), JSON.stringify(Array.from(userPointsMap.entries())));
+
+        function shootConfettiPiece() {
+            const c = document.createElement('div');
+            c.className = 'confetti-piece';
+            c.style.cssText = `left:${Math.random()*window.innerWidth}px;top:-20px;background:hsl(${Math.random()*360},80%,60%);width:${Math.random()*10+4}px;height:${Math.random()*10+4}px;border-radius:${Math.random()>.5?'50%':'0'}`;
+            document.body.appendChild(c);
+            c.animate([{ transform: 'translateY(0px) rotate(0deg)', opacity: 1 }, { transform: `translateY(${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1500 }).onfinish = () => c.remove();
         }
-    }, 5000);
-    if (isIframe) {
-        const kickPanel = document.getElementById('kickPanel');
-        if (kickPanel) kickPanel.style.display = 'none';
-    }
+        function shootConfetti() { for (let i = 0; i < 80; i++) setTimeout(shootConfettiPiece, i * 15); }
+
+        // ========== WINNER OVERLAY (only winner's messages) ==========
+        function showWinnerOverlay(winnerName, team, slot) {
+            if (currentWinnerOverlay) currentWinnerOverlay.remove();
+            const winnersOwnChat = fullChatLog.filter(entry => entry.username.toLowerCase() === winnerName.toLowerCase()).slice(0,30).map(entry => `<div>[${entry.timestamp}] ${escapeHtml(entry.message)}</div>`).join('');
+            const chatLogHtml = winnersOwnChat || '<div>No recent messages from this winner in the chat log.</div>';
+            const overlay = document.createElement('div');
+            overlay.className = 'winner-overlay';
+            overlay.innerHTML = `
+                <div class="winner-card">
+                    <h1>WINNER!</h1>
+                    <div class="winner-name">${escapeHtml(winnerName)}</div>
+                    <div style="font-size:1.2rem;">Team ${team} wins with</div>
+                    <div class="winner-slot-img"><img src="${slot.image_url}" style="width:100px;border-radius:12px;"></div>
+                    <div>${escapeHtml(slot.name)}</div>
+                    <div class="winner-chat-log">
+                        <strong>📝 ${escapeHtml(winnerName)}'s chat messages (last 30)</strong>
+                        <div class="winner-main-chat" style="margin-top: 10px;">${chatLogHtml}</div>
+                    </div>
+                    <button id="closeWinnerBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Continue</button>
+                </div>`;
+            document.body.appendChild(overlay);
+            currentWinnerOverlay = overlay;
+            currentWinnerName = winnerName;
+            document.getElementById('closeWinnerBtn').addEventListener('click', () => { overlay.remove(); currentWinnerOverlay = null; currentWinnerName = null; });
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        }
+
+        // ========== RANDOM SLOT PICKER ==========
+        let isSpinning = false;
+        let spinInterval = null;
+        function getFilteredSlots() { return slotData.filter(slot => selectedProviders.has(slot.provider)); }
+        function startSpinAnimation(team) {
+            if (isSpinning) return;
+            const filtered = getFilteredSlots();
+            if (filtered.length === 0) { alert('No slots match the selected filters'); return; }
+            isSpinning = true;
+            const targetButton = team === 'A' ? randomForABtn : randomForBBtn;
+            targetButton.disabled = true;
+            randomForABtn.disabled = true;
+            randomForBBtn.disabled = true;
+            let frames = 0;
+            const totalFrames = 30;
+            const frameDelay = 80;
+            const randomIndex = Math.floor(Math.random() * filtered.length);
+            const chosenSlot = filtered[randomIndex];
+            randomSlotResultImg.style.display = 'block';
+            spinInterval = setInterval(() => {
+                if (frames >= totalFrames) {
+                    clearInterval(spinInterval);
+                    isSpinning = false;
+                    randomForABtn.disabled = false;
+                    randomForBBtn.disabled = false;
+                    targetButton.disabled = false;
+                    if (team === 'A') {
+                        selectedSlotA = chosenSlot;
+                        updateSlotPreview('A', selectedSlotA);
+                        slotASelect.value = chosenSlot.name;
+                        updateSlotNameDisplay();
+                        sendSlotsToServer();
+                    } else {
+                        selectedSlotB = chosenSlot;
+                        updateSlotPreview('B', selectedSlotB);
+                        slotBSelect.value = chosenSlot.name;
+                        updateSlotNameDisplay();
+                        sendSlotsToServer();
+                    }
+                    randomSlotResultImg.src = chosenSlot.image_url;
+                    randomSlotResultImg.style.transform = 'scale(1.05)';
+                    setTimeout(() => randomSlotResultImg.style.transform = 'scale(1)', 200);
+                    return;
+                }
+                const tempSlot = filtered[Math.floor(Math.random() * filtered.length)];
+                randomSlotResultImg.src = tempSlot.image_url;
+                const rotation = frames * 22;
+                const scale = 1 + Math.sin(frames * 0.8) * 0.05;
+                randomSlotResultImg.style.transform = `rotateY(${rotation}deg) scale(${scale})`;
+                frames++;
+            }, frameDelay);
+        }
+        randomForABtn.addEventListener('click', () => startSpinAnimation('A'));
+        randomForBBtn.addEventListener('click', () => startSpinAnimation('B'));
+
+        // ========== PERSISTENCE ==========
+        let saveTimeout = null;
+        function saveState() {
+            if (!currentChannel) return;
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                localStorage.setItem(getStorageKey('slotWarState'), JSON.stringify({
+                    participants, joiningOpen, selectedSlotA: selectedSlotA?.name, selectedSlotB: selectedSlotB?.name,
+                    currentChannel, lastWinnerA, lastWinnerB, winnerHistory
+                }));
+                saveFilterState();
+                saveTimeout = null;
+            }, 500);
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(getStorageKey('slotWarState'));
+            if (!saved) return;
+            try {
+                const s = JSON.parse(saved);
+                if (!s.currentChannel) return;
+                participants = s.participants || [];
+                participants.forEach(p => participantsMap.set(p.id, p));
+                joiningOpen = s.joiningOpen !== false;
+                if (s.selectedSlotA) selectedSlotA = slotData.find(sl => sl.name === s.selectedSlotA);
+                if (s.selectedSlotB) selectedSlotB = slotData.find(sl => sl.name === s.selectedSlotB);
+                currentChannel = s.currentChannel;
+                currentChannelKey = currentChannel;
+                if (s.lastWinnerA) lastWinnerA = s.lastWinnerA;
+                if (s.lastWinnerB) lastWinnerB = s.lastWinnerB;
+                if (s.winnerHistory) winnerHistory = s.winnerHistory;
+                updateWinnerHistoryPanel();
+                renderTeams();
+                if (selectedSlotA) updateSlotPreview('A', selectedSlotA);
+                if (selectedSlotB) updateSlotPreview('B', selectedSlotB);
+                if (slotASelect && selectedSlotA) slotASelect.value = selectedSlotA.name;
+                if (slotBSelect && selectedSlotB) slotBSelect.value = selectedSlotB.name;
+                updateSlotNameDisplay();
+                sendParticipantsToServer();
+                sendSlotsToServer();
+            } catch(e) { console.warn(e); }
+        }
+
+        // ========== UI BUTTONS ==========
+        function updateJoiningButtons() {
+            if (joiningOpen) {
+                openJoiningBtn.classList.add('joining-open');
+                closeJoiningBtn.classList.remove('joining-closed');
+            } else {
+                openJoiningBtn.classList.remove('joining-open');
+                closeJoiningBtn.classList.add('joining-closed');
+            }
+        }
+        openJoiningBtn.addEventListener('click', () => { joiningOpen = true; updateJoiningButtons(); saveState(); });
+        closeJoiningBtn.addEventListener('click', () => { joiningOpen = false; updateJoiningButtons(); saveState(); });
+        updateJoiningButtons();
+
+        let userPointsMap = new Map();
+        function clearAllTeams() {
+            if (confirm("Clear all teams? Points will be preserved.")) {
+                participants = [];
+                participantsMap.clear();
+                joinedUsers.clear();
+                renderTeams();
+                saveState();
+                sendParticipantsToServer();
+            }
+        }
+        clearTeamsBtn.addEventListener('click', clearAllTeams);
+
+        resetGameBtn.addEventListener('click', () => {
+            if (confirm("⚠️ HARD RESET ⚠️\nThis will clear ALL saved data.\nPage will reload.")) {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.toLowerCase().includes('slotwar') || key.includes('aceRace') || key.includes('userPoints'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                sessionStorage.clear();
+                location.href = location.pathname + '?reset=' + Date.now();
+            }
+        });
+
+        manualAddA.addEventListener('click', () => {
+            let name = manualUsername.value.trim();
+            if (!name) { alert("Enter a username"); return; }
+            addParticipantToTeam(name, 'A');
+            manualUsername.value = '';
+        });
+        manualAddB.addEventListener('click', () => {
+            let name = manualUsername.value.trim();
+            if (!name) { alert("Enter a username"); return; }
+            addParticipantToTeam(name, 'B');
+            manualUsername.value = '';
+        });
+
+        givePointsA.addEventListener('click', () => givePointsToTeam('A'));
+        givePointsB.addEventListener('click', () => givePointsToTeam('B'));
+        pickWinnerA.addEventListener('click', () => showWheelOverlay('A'));
+        pickWinnerB.addEventListener('click', () => showWheelOverlay('B'));
+
+        function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' })[m] || m); }
+
+        // ========== INIT ==========
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'KICK_TOKEN') {
+                if (event.data.token) {
+                    manualDisconnect = false;
+                    if (event.data.channel) {
+                        currentChannel = event.data.channel;
+                        currentChannelKey = currentChannel;
+                        startKickBrowserChat(currentChannel);
+                    }
+                } else {
+                    manualDisconnect = true;
+                    stopKickBrowserChat();
+                    currentChannel = null;
+                    currentChannelKey = '';
+                }
+            }
+        });
+
+        connectWebSocket();
+        loadSlotData().then(() => {
+            loadState();
+            if (currentChannel) startKickBrowserChat(currentChannel);
+        });
+    })();
 </script>
 </body>
 </html>

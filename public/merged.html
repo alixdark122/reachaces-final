@@ -18,20 +18,8 @@
         .kick-info button { background: linear-gradient(135deg, #19C6FD, #3b82f6); border: none; padding: 8px 20px; border-radius: 60px; font-weight: 600; cursor: pointer; }
         .kick-info input { background: #0f172a; border: 1px solid rgba(25,198,253,0.3); padding: 8px 14px; border-radius: 60px; color: white; }
         .status { font-size: 0.8rem; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 60px; }
-        /* Asset container at the bottom of each tab */
-        .asset-container {
-            margin-top: 10px;
-            text-align: center;
-            background: rgba(0,0,0,0.3);
-            border-radius: 28px;
-            padding: 16px;
-            border: 1px solid rgba(25,198,253,0.2);
-        }
-        .asset-container img {
-            max-width: 80%;
-            border-radius: 10px;
-            max-height: 50px;
-        }
+        .asset-container { margin-top: 10px; text-align: center; background: rgba(0,0,0,0.3); border-radius: 28px; padding: 16px; border: 1px solid rgba(25,198,253,0.2); }
+        .asset-container img { max-width: 80%; border-radius: 10px; max-height: 50px; }
     </style>
 </head>
 <body>
@@ -52,21 +40,146 @@
 
 <div id="slotwar-content" class="tab-content active">
     <iframe src="/slot-war.html" id="slotwarFrame"></iframe>
-    <!-- Asset container for Slot War -->
     <div class="asset-container">
         <img src="/assets/reachacesText.png" alt="ReachAces Text Logo">
     </div>
 </div>
 <div id="acerace-content" class="tab-content">
     <iframe src="/game.html" id="aceraceFrame"></iframe>
-    <!-- Asset container for Ace Race -->
     <div class="asset-container">
         <img src="/assets/reachacesText.png" alt="ReachAces Text Logo">
     </div>
 </div>
 
 <script>
-    // Tab switching
+    // ========== PERSISTENT LOGIN STATE ==========
+    let kickToken = null;
+    let currentChannel = null;
+
+    // Helper: send token to a specific iframe
+    function sendTokenToIframe(iframe, token, channel) {
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'KICK_TOKEN', token: token, channel: channel }, '*');
+            console.log(`Token sent to ${iframe.id}`, { channel: channel });
+        }
+    }
+
+    // Send to both iframes
+    function sendTokenToAllIframes() {
+        const swFrame = document.getElementById('slotwarFrame');
+        const arFrame = document.getElementById('aceraceFrame');
+        if (kickToken) {
+            if (swFrame) sendTokenToIframe(swFrame, kickToken, currentChannel);
+            if (arFrame) sendTokenToIframe(arFrame, kickToken, currentChannel);
+        } else {
+            // Send null to clear any stale token in iframes
+            if (swFrame) sendTokenToIframe(swFrame, null, null);
+            if (arFrame) sendTokenToIframe(arFrame, null, null);
+        }
+    }
+
+    // When iframe loads, send token again (important after refresh)
+    function setupIframeReload(iframeId) {
+        const iframe = document.getElementById(iframeId);
+        if (!iframe) return;
+        iframe.addEventListener('load', () => {
+            console.log(`${iframeId} reloaded, sending token`);
+            if (kickToken) {
+                sendTokenToIframe(iframe, kickToken, currentChannel);
+            }
+        });
+    }
+
+    // Update UI based on login state
+    function updateUI() {
+        if (kickToken && currentChannel) {
+            document.getElementById('statusDisplay').innerHTML = `🟢 Logged in as ${currentChannel}`;
+            document.getElementById('loginBtn').textContent = 'Disconnect';
+            document.getElementById('userInfo').innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
+            document.getElementById('channelInput').value = currentChannel;
+        } else if (kickToken) {
+            document.getElementById('statusDisplay').innerHTML = `🟢 Logged in to Kick (no channel)`;
+            document.getElementById('loginBtn').textContent = 'Disconnect';
+            document.getElementById('userInfo').innerHTML = `<div>Logged in to Kick</div>`;
+        } else {
+            document.getElementById('statusDisplay').innerHTML = `⚪ Not logged in`;
+            document.getElementById('loginBtn').textContent = 'Login with Kick';
+            document.getElementById('userInfo').innerHTML = '';
+        }
+    }
+
+    // Save to localStorage
+    function persistState() {
+        if (kickToken) {
+            localStorage.setItem('kickToken', kickToken);
+            localStorage.setItem('currentChannel', currentChannel || '');
+        } else {
+            localStorage.removeItem('kickToken');
+            localStorage.removeItem('currentChannel');
+        }
+    }
+
+    // Restore from localStorage on page load
+    function restoreState() {
+        const savedToken = localStorage.getItem('kickToken');
+        const savedChannel = localStorage.getItem('currentChannel');
+        if (savedToken) {
+            kickToken = savedToken;
+            currentChannel = savedChannel || null;
+            updateUI();
+            // Send to iframes after they load (setup event listeners will handle)
+        } else {
+            kickToken = null;
+            currentChannel = null;
+            updateUI();
+        }
+    }
+
+    // ========== EVENT HANDLERS ==========
+    // Login / Disconnect button
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        if (kickToken) {
+            // Disconnect: clear state
+            kickToken = null;
+            currentChannel = null;
+            persistState();
+            updateUI();
+            sendTokenToAllIframes(); // send null to iframes
+        } else {
+            // Open OAuth popup
+            window.open('/auth/kick', 'KickLogin', 'width=600,height=700');
+        }
+    });
+
+    // Connect button (set channel)
+    document.getElementById('connectBtn').addEventListener('click', () => {
+        if (!kickToken) {
+            alert('Please login first');
+            return;
+        }
+        const channel = document.getElementById('channelInput').value.trim();
+        if (!channel) {
+            alert('Enter a channel name');
+            return;
+        }
+        currentChannel = channel;
+        persistState();
+        updateUI();
+        sendTokenToAllIframes();
+    });
+
+    // Listen for OAuth callback message (from popup)
+    window.addEventListener('message', (event) => {
+        if (event.data.type === 'KICK_TOKEN') {
+            kickToken = event.data.token;
+            currentChannel = event.data.channel || null;
+            persistState();
+            updateUI();
+            sendTokenToAllIframes();
+        }
+    });
+
+    // Tab switching (does not affect connection)
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -77,94 +190,16 @@
         });
     });
 
-    let kickToken = null;
-    let currentChannel = null;
+    // Setup iframe reload listeners
+    setupIframeReload('slotwarFrame');
+    setupIframeReload('aceraceFrame');
 
-    function sendTokenToIframes() {
-        const msg = { type: 'KICK_TOKEN', token: kickToken, channel: currentChannel };
-        const swFrame = document.getElementById('slotwarFrame');
-        const arFrame = document.getElementById('aceraceFrame');
-        if (swFrame && swFrame.contentWindow) swFrame.contentWindow.postMessage(msg, '*');
-        if (arFrame && arFrame.contentWindow) arFrame.contentWindow.postMessage(msg, '*');
-        console.log('Token sent to iframes', { channel: currentChannel });
-    }
-
-    window.addEventListener('message', (event) => {
-        if (event.data.type === 'KICK_TOKEN') {
-            kickToken = event.data.token;
-            currentChannel = event.data.channel;
-            if (currentChannel) {
-                document.getElementById('channelInput').value = currentChannel;
-                document.getElementById('statusDisplay').innerHTML = `🟢 Logged in as ${currentChannel}`;
-                document.getElementById('loginBtn').textContent = 'Disconnect';
-                document.getElementById('userInfo').innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
-                sendTokenToIframes();
-                localStorage.setItem('kickToken', kickToken);
-                localStorage.setItem('currentChannel', currentChannel);
-            } else {
-                document.getElementById('statusDisplay').innerHTML = `🟢 Logged in to Kick`;
-                document.getElementById('loginBtn').textContent = 'Disconnect';
-                sendTokenToIframes();
-            }
-        }
-    });
-
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        if (kickToken) {
-            kickToken = null;
-            currentChannel = null;
-            document.getElementById('statusDisplay').innerHTML = '⚪ Not logged in';
-            document.getElementById('loginBtn').textContent = 'Login with Kick';
-            document.getElementById('userInfo').innerHTML = '';
-            localStorage.removeItem('kickToken');
-            localStorage.removeItem('currentChannel');
-            sendTokenToIframes();
-        } else {
-            window.open('/auth/kick', 'KickLogin', 'width=600,height=700');
-        }
-    });
-
-    document.getElementById('connectBtn').addEventListener('click', () => {
-        if (!kickToken) { alert('Please login first'); return; }
-        const channel = document.getElementById('channelInput').value.trim();
-        if (!channel) { alert('Enter a channel name'); return; }
-        currentChannel = channel;
-        localStorage.setItem('currentChannel', currentChannel);
-        document.getElementById('statusDisplay').innerHTML = `🟢 Connecting to ${channel}...`;
-        sendTokenToIframes();
-        document.getElementById('statusDisplay').innerHTML = `🟢 Connected to ${channel}`;
-    });
-
-    const savedToken = localStorage.getItem('kickToken');
-    const savedChannel = localStorage.getItem('currentChannel');
-    if (savedToken) {
-        kickToken = savedToken;
-        currentChannel = savedChannel;
-        if (currentChannel) {
-            document.getElementById('channelInput').value = currentChannel;
-            document.getElementById('statusDisplay').innerHTML = `🟢 Logged in as ${currentChannel}`;
-            document.getElementById('loginBtn').textContent = 'Disconnect';
-            document.getElementById('userInfo').innerHTML = `<div>Logged in as <strong>${currentChannel}</strong></div>`;
-        } else {
-            document.getElementById('statusDisplay').innerHTML = `🟢 Logged in to Kick`;
-            document.getElementById('loginBtn').textContent = 'Disconnect';
-        }
-        let attempts = 0;
-        function sendOnce() {
-            attempts++;
-            const swFrame = document.getElementById('slotwarFrame');
-            const arFrame = document.getElementById('aceraceFrame');
-            if (swFrame && swFrame.contentWindow && arFrame && arFrame.contentWindow) {
-                sendTokenToIframes();
-            } else if (attempts < 20) {
-                setTimeout(sendOnce, 200);
-            } else {
-                console.warn('Iframes not ready after 4 seconds, sending anyway');
-                sendTokenToIframes();
-            }
-        }
-        sendOnce();
-    }
+    // Initial restore and send token when iframes are ready (with a small delay to ensure they exist)
+    restoreState();
+    // Also try to send after a short delay (in case iframe load event already fired)
+    setTimeout(() => {
+        if (kickToken) sendTokenToAllIframes();
+    }, 500);
 </script>
 </body>
 </html>
