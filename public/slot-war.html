@@ -796,115 +796,105 @@
         });
 
         // ========== WINNER WHEEL ==========
-        function showWheelOverlay(team) {
-            let teamMembers = participants.filter(p => p.team === team);
-            if (teamMembers.length === 0) { alert(`No members in Team ${team}.`); return false; }
-            let shuffled = [...teamMembers];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
-                [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+       function showWheelOverlay(team) {
+    let teamMembers = participants.filter(p => p.team === team);
+    if (teamMembers.length === 0) {
+        alert(`No members in Team ${team}.`);
+        return false;
+    }
+
+    // ---- CRYPTO SHUFFLE (fair randomness) ----
+    let shuffled = [...teamMembers];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+    }
+    let winner = shuffled[0];
+    const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
+    if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) {
+        winner = shuffled[1] || shuffled[0];
+    }
+    const winnerName = winner.name;
+    if (team === 'A') lastWinnerA = winnerName;
+    else lastWinnerB = winnerName;
+
+    // ---- BUILD WHEEL OVERLAY ----
+    const names = teamMembers.map(p => p.name);
+    const overlay = document.createElement('div');
+    overlay.className = 'wheel-overlay';
+    overlay.innerHTML = `
+        <div class="wheel-container">
+            <div class="wheel-title">Picking Winner from Team ${team}</div>
+            <div class="wheel-viewport">
+                <div id="wheelScroller" class="wheel-scroller"></div>
+                <div class="wheel-pointer"></div>
+            </div>
+            <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
+            <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const scroller = document.getElementById('wheelScroller');
+    const repeatFactor = 50;
+    let repeated = [];
+    for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
+    scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+
+    // Force reflow to get correct dimensions
+    scroller.offsetHeight;
+    const firstItem = scroller.querySelector('.wheel-item');
+    const itemHeight = firstItem.getBoundingClientRect().height;
+    const viewportHeight = 200;
+    const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+    const totalItems = repeated.length;
+
+    // ---- Find valid index within visible range (25 to totalItems-25) ----
+    const minIndex = 25;
+    const maxIndex = totalItems - 25;
+    let targetIdx = -1;
+    for (let i = minIndex; i <= maxIndex; i++) {
+        if (repeated[i] === winnerName) {
+            targetIdx = i;
+            break;
+        }
+    }
+    if (targetIdx === -1) {
+        // fallback: any occurrence within range (should never happen)
+        for (let i = minIndex; i <= maxIndex; i++) {
+            if (repeated[i] === winnerName) {
+                targetIdx = i;
+                break;
             }
-            let winner = shuffled[0];
-            const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
-            if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) winner = shuffled[1] || shuffled[0];
-            const winnerName = winner.name;
-            if (team === 'A') lastWinnerA = winnerName; else lastWinnerB = winnerName;
-
-            const names = teamMembers.map(p => p.name);
-            const overlay = document.createElement('div');
-            overlay.className = 'wheel-overlay';
-            overlay.innerHTML = `
-                <div class="wheel-container">
-                    <div class="wheel-title">Picking Winner from Team ${team}</div>
-                    <div class="wheel-viewport">
-                        <div id="wheelScroller" class="wheel-scroller"></div>
-                        <div class="wheel-pointer"></div>
-                    </div>
-                    <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
-                    <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
-                </div>`;
-            document.body.appendChild(overlay);
-            const scroller = document.getElementById('wheelScroller');
-            const repeatFactor = 50;
-            let repeated = [];
-            for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
-            scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
-            const firstItem = scroller.querySelector('.wheel-item');
-            const itemHeight = firstItem.getBoundingClientRect().height;
-            const viewportHeight = 200;
-            const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
-            const totalItems = repeated.length;
-            let targetIdx = -1;
-            for (let i = 0; i < totalItems; i++) { if (repeated[i] === winnerName) { targetIdx = i; break; } }
-            if (targetIdx === -1) targetIdx = 0;
-            let targetOffset = -(targetIdx * itemHeight) + centerOffset;
-            const duration = 6 + Math.random() * 5;
-            scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
-            scroller.style.transform = `translateY(${targetOffset}px)`;
-            const resultDiv = document.getElementById('wheelResult');
-            scroller.addEventListener('transitionend', () => {
-                resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
-                playWinSound();
-                shootConfetti();
-                const slot = team === 'A' ? selectedSlotA : selectedSlotB;
-                if (slot) {
-                    addWinnerToHistory(winnerName, team, slot.name);
-                    showWinnerOverlay(winnerName, team, slot);
-                }
-            }, { once: true });
-            document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
-            return true;
         }
+    }
+    if (targetIdx === -1) targetIdx = minIndex;
 
-        function playWinSound() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                if (ctx.state === 'suspended') ctx.resume();
-                const o = ctx.createOscillator();
-                const g = ctx.createGain();
-                o.connect(g); g.connect(ctx.destination);
-                o.frequency.value = 880;
-                g.gain.setValueAtTime(0.2, ctx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.5);
-                o.start(); o.stop(ctx.currentTime + 0.5);
-            } catch(e) {}
-        }
+    // Calculate target offset (no random jitter)
+    let targetOffset = -(targetIdx * itemHeight) + centerOffset;
+    const maxOffset = -(0 * itemHeight) + centerOffset;
+    const minOffset = -((totalItems - 1) * itemHeight) + centerOffset;
+    targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
 
-        function shootConfettiPiece() {
-            const c = document.createElement('div');
-            c.className = 'confetti-piece';
-            c.style.cssText = `left:${Math.random()*window.innerWidth}px;top:-20px;background:hsl(${Math.random()*360},80%,60%);width:${Math.random()*10+4}px;height:${Math.random()*10+4}px;border-radius:${Math.random()>.5?'50%':'0'}`;
-            document.body.appendChild(c);
-            c.animate([{ transform: 'translateY(0px) rotate(0deg)', opacity: 1 }, { transform: `translateY(${window.innerHeight+100}px) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1500 }).onfinish = () => c.remove();
-        }
-        function shootConfetti() { for (let i = 0; i < 80; i++) setTimeout(shootConfettiPiece, i * 15); }
+    // ---- DRAMATIC ANIMATION (8–12 sec, extremely fast start, smooth stop) ----
+    const duration = Math.random() * 4 + 8;   // 8–12 seconds
+    scroller.style.transition = `transform ${duration}s cubic-bezier(0.05, 0.95, 0.2, 1)`;
+    scroller.style.transform = `translateY(${targetOffset}px)`;
 
-        // ========== WINNER OVERLAY (only winner's messages) ==========
-        function showWinnerOverlay(winnerName, team, slot) {
-            if (currentWinnerOverlay) currentWinnerOverlay.remove();
-            const winnersOwnChat = fullChatLog.filter(entry => entry.username.toLowerCase() === winnerName.toLowerCase()).slice(0,30).map(entry => `<div>[${entry.timestamp}] ${escapeHtml(entry.message)}</div>`).join('');
-            const chatLogHtml = winnersOwnChat || '<div>No recent messages from this winner in the chat log.</div>';
-            const overlay = document.createElement('div');
-            overlay.className = 'winner-overlay';
-            overlay.innerHTML = `
-                <div class="winner-card">
-                    <h1>WINNER!</h1>
-                    <div class="winner-name">${escapeHtml(winnerName)}</div>
-                    <div style="font-size:1.2rem;">Team ${team} wins with</div>
-                    <div class="winner-slot-img"><img src="${slot.image_url}" style="width:100px;border-radius:12px;"></div>
-                    <div>${escapeHtml(slot.name)}</div>
-                    <div class="winner-chat-log">
-                        <strong>📝 ${escapeHtml(winnerName)}'s chat messages (last 30)</strong>
-                        <div class="winner-main-chat" style="margin-top: 10px;">${chatLogHtml}</div>
-                    </div>
-                    <button id="closeWinnerBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Continue</button>
-                </div>`;
-            document.body.appendChild(overlay);
-            currentWinnerOverlay = overlay;
-            currentWinnerName = winnerName;
-            document.getElementById('closeWinnerBtn').addEventListener('click', () => { overlay.remove(); currentWinnerOverlay = null; currentWinnerName = null; });
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    const resultDiv = document.getElementById('wheelResult');
+    scroller.addEventListener('transitionend', () => {
+        resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
+        playWinSound();
+        shootConfetti();
+        const slot = team === 'A' ? selectedSlotA : selectedSlotB;
+        if (slot) {
+            addWinnerToHistory(winnerName, team, slot.name);
+            showWinnerOverlay(winnerName, team, slot);
         }
+    }, { once: true });
+
+    document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
+    return true;
+}
 
         // ========== RANDOM SLOT PICKER ==========
         let isSpinning = false;

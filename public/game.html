@@ -66,7 +66,7 @@
         .card-placeholder.has-back { border: none; background: transparent; padding: 0; }
         @keyframes drawCard { 0% { opacity: 0; transform: translateY(-40px) rotate(-8deg); } 100% { opacity: 1; transform: translateY(0) rotate(0); } }
         .card-flipper { perspective: 800px; width: 110px; height: 154px; }
-        .card-flipper-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s ease-in-out; transform-style: preserve-3d; }
+        .card-flipper-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s ease-in-out; transform-style: preserve-3d; will-change: transform; } /* FIX: GPU acceleration */
         .card-flipper-inner.flipped { transform: rotateY(180deg); }
         .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 12px; overflow: hidden; }
         .card-front { transform: rotateY(180deg); }
@@ -462,11 +462,11 @@
     let presetWinEnabled = false;
     let presetCardCode = '';
     let playerPicksCard = false;
-
+let lastSelectedPair = null;
     let reconnectTimer = null;
     let reconnectAttempt = 0;
     let manualDisconnect = false;
-
+let lastSingleWinner = null;
     let readyCheckActive = false;
     let readyCheckPlayers = [null, null];
     let readyStatus = [false, false];
@@ -926,92 +926,95 @@
     }
 
     // ========== SINGLE WINNER PICKER (wheel animation) ==========
-    function pickSingleWinner() {
-        if (isDuelActive) {
-            gameMessageSpan.innerText = "Stop the current duel first.";
-            return;
-        }
-        if (participants.length === 0) {
-            gameMessageSpan.innerText = "No participants to pick from.";
-            return;
-        }
+ // add near other globals
 
-        const names = participants.map(p => p.name);
-        const overlay = document.createElement('div');
-        overlay.className = 'wheel-overlay';
-        overlay.innerHTML = `
-            <div class="wheel-container" style="max-width: 500px;">
-                <div class="wheel-title">🎁 Picking a Winner</div>
-                <div class="wheel-viewport" style="height: 200px; position: relative; overflow: hidden;">
-                    <div id="singleWheelScroller" class="wheel-scroller"></div>
-                    <div class="wheel-pointer" style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 15px solid #19C6FD; border-top: 10px solid transparent; border-bottom: 10px solid transparent; filter: drop-shadow(0 0 2px black); pointer-events: none; z-index: 10;"></div>
-                </div>
-                <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
-                <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
-            </div>`;
-        document.body.appendChild(overlay);
-
-        const scroller = document.getElementById('singleWheelScroller');
-        const repeatFactor = 100;
-        let repeated = [];
-        for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
-        scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
-
-        const firstItem = scroller.querySelector('.wheel-item');
-        const itemHeight = firstItem.getBoundingClientRect().height;
-        const viewportHeight = 200;
-        const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
-        const totalItems = repeated.length;
-
-        let lastWinnerName = winnerHistory[0]?.winnerName;
-        let candidates = [...names];
-        if (lastWinnerName && names.length > 1) {
-            candidates = names.filter(n => n !== lastWinnerName);
-        }
-        const winnerName = candidates[Math.floor(Math.random() * candidates.length)];
-        const winner = participants.find(p => p.name === winnerName);
-
-        let targetIdx = -1;
-        const middleStart = Math.floor(totalItems * 0.3);
-        const middleEnd = Math.floor(totalItems * 0.7);
-        for (let i = middleStart; i < middleEnd; i++) {
-            if (repeated[i] === winnerName) {
-                targetIdx = i;
-                break;
-            }
-        }
-        if (targetIdx === -1) {
-            for (let i = 0; i < totalItems; i++) {
-                if (repeated[i] === winnerName) {
-                    targetIdx = i;
-                    break;
-                }
-            }
-        }
-        if (targetIdx === -1) targetIdx = 0;
-
-        let targetOffset = -(targetIdx * itemHeight) + centerOffset;
-        const maxOffset = -(0 * itemHeight) + centerOffset;
-        const minOffset = -((totalItems-1) * itemHeight) + centerOffset;
-        targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
-
-        const duration = 6 + Math.random() * 5;
-        scroller.style.transition = `transform ${duration}s cubic-bezier(0.1, 0.9, 0.3, 1.0)`;
-        scroller.style.transform = `translateY(${targetOffset}px)`;
-
-        const resultDiv = document.getElementById('wheelResult');
-        scroller.addEventListener('transitionend', () => {
-            resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
-            playWinSound();
-            shootConfetti();
-            addWinnerToHistory(winnerName, "picked as single winner");
-            showWinnerOverlay(winnerName, []);
-        }, { once: true });
-
-        document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
-        setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 15000);
+function pickSingleWinner() {
+    if (isDuelActive) {
+        gameMessageSpan.innerText = "Stop the current duel first.";
+        return;
+    }
+    if (participants.length === 0) {
+        gameMessageSpan.innerText = "No participants to pick from.";
+        return;
     }
 
+    // ---- FAIR SELECTION: shuffle participants using crypto ----
+    let shuffled = [...participants];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+    }
+    let winner = shuffled[0];
+    if (participants.length > 1 && lastSingleWinner && winner.name === lastSingleWinner) {
+        winner = shuffled[1] || shuffled[0];
+    }
+    const winnerName = winner.name;
+    lastSingleWinner = winnerName;
+
+    // ---- BUILD REPEATED LIST ----
+    const names = participants.map(p => p.name);
+    const repeatFactor = 100;
+    let repeated = [];
+    for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
+    const totalItems = repeated.length;
+    const minIndex = 25;
+    const maxIndex = totalItems - 25;
+
+    let targetIdx = -1;
+    for (let i = minIndex; i <= maxIndex; i++) {
+        if (repeated[i] === winnerName) {
+            targetIdx = i;
+            break;
+        }
+    }
+    if (targetIdx === -1) targetIdx = minIndex;
+
+    // ---- CREATE OVERLAY ----
+    const overlay = document.createElement('div');
+    overlay.className = 'wheel-overlay';
+    overlay.innerHTML = `
+        <div class="wheel-container" style="max-width: 500px;">
+            <div class="wheel-title">🎁 Picking a Winner</div>
+            <div class="wheel-viewport" style="height: 200px; position: relative; overflow: hidden;">
+                <div id="singleWheelScroller" class="wheel-scroller"></div>
+                <div class="wheel-pointer"></div>
+            </div>
+            <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
+            <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const scroller = document.getElementById('singleWheelScroller');
+    scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+    scroller.offsetHeight; // force reflow
+
+    const firstItem = scroller.querySelector('.wheel-item');
+    const itemHeight = firstItem.getBoundingClientRect().height;
+    const viewportHeight = 200;
+    const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+
+    let targetOffset = -(targetIdx * itemHeight) + centerOffset;
+    const maxOffset = -(0 * itemHeight) + centerOffset;
+    const minOffset = -((totalItems-1) * itemHeight) + centerOffset;
+    targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
+
+    // ---- DRAMATIC WHEEL ANIMATION (8–12 sec, extremely fast start, smooth stop) ----
+    const duration = Math.random() * 4 + 8;   // 8–12 sec
+    scroller.style.transition = `transform ${duration}s cubic-bezier(0.05, 0.95, 0.2, 1)`;
+    scroller.style.transform = `translateY(${targetOffset}px)`;
+
+    const resultDiv = document.getElementById('wheelResult');
+    scroller.addEventListener('transitionend', () => {
+        resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
+        playWinSound();
+        shootConfetti();
+        addWinnerToHistory(winnerName, "picked as single winner");
+        showWinnerOverlay(winnerName, []);
+    }, { once: true });
+
+    document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
+    setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 15000);
+}
     // ========== PARTICIPANTS ==========
     function addParticipant(username, timestamp) {
         const name = username.trim();
@@ -1116,76 +1119,140 @@
     }
 
     // ========== WHEEL SELECTOR (for picking two random) ==========
-    function showWheelSelector() {
-        if (participants.length < 2) {
-            gameMessageSpan.innerText = "Need at least 2 participants";
-            return false;
-        }
-        const overlay = document.createElement('div');
-        overlay.className = 'wheel-overlay';
-        overlay.innerHTML = `
-            <div class="wheel-container">
-                <div class="wheel-title">⚡ Selecting Duelists ⚡</div>
-                <div class="wheels">
-                    <div class="wheel">
-                        <div class="wheel-label">Player 1</div>
-                        <div class="wheel-viewport">
-                            <div id="wheel1Scroller" class="wheel-scroller"></div>
-                            <div class="wheel-pointer"></div>
-                        </div>
-                    </div>
-                    <div class="wheel">
-                        <div class="wheel-label">Player 2</div>
-                        <div class="wheel-viewport">
-                            <div id="wheel2Scroller" class="wheel-scroller"></div>
-                            <div class="wheel-pointer"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        document.body.appendChild(overlay);
-        const names = participants.map(p => p.name);
-        const repeatFactor = 100;
-        let repeated = [];
-        for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
-        const w1 = document.getElementById('wheel1Scroller');
-        const w2 = document.getElementById('wheel2Scroller');
-        w1.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
-        w2.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
-        const firstItem = w1.querySelector('.wheel-item');
-        const itemHeight = firstItem.getBoundingClientRect().height;
-        const viewportHeight = 120;
-        const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
-        const totalItems = repeated.length;
-        let idx1, idx2, n1, n2;
-        do { idx1 = Math.floor(Math.random() * (totalItems - 50)) + 25; idx2 = Math.floor(Math.random() * (totalItems - 50)) + 25; n1 = repeated[idx1]; n2 = repeated[idx2]; } while (n1 === n2 && participants.length > 1);
-        const d1 = Math.random() * 4 + 6, d2 = Math.random() * 4 + 6;
-        w1.style.transition = `transform ${d1}s cubic-bezier(0.05, 0.9, 0.2, 1)`;
-        w2.style.transition = `transform ${d2}s cubic-bezier(0.05, 0.9, 0.2, 1)`;
-        w1.style.transform = `translateY(${-(idx1 * itemHeight) + centerOffset}px)`;
-        w2.style.transform = `translateY(${-(idx2 * itemHeight) + centerOffset}px)`;
-        playWheelSpinSound();
-        let stopped = 0;
-        function onStop() {
-            stopped++;
-            if (stopped !== 2) return;
-            overlay.remove();
-            let p1 = participants.find(p => p.name === repeated[idx1]);
-            let p2 = participants.find(p => p.name === repeated[idx2]);
-            if (p1 === p2 && participants.length > 1) p2 = participants.filter(p => p.name !== repeated[idx1])[Math.floor(Math.random() * (participants.length - 1))];
-            selectedPlayer1 = p1; selectedPlayer2 = p2;
-            updateSelectedDisplay(); renderParticipants(); resetGameVisualsOnly();
-            gameMessageSpan.innerText = `Selected: ${p1.name} vs ${p2.name}`;
-            startReadyCheckContainer.style.display = 'block';
-            showReadyCheckOverlay(selectedPlayer1, selectedPlayer2);
-            markStateDirty(); playDing();
-        }
-        w1.addEventListener('transitionend', onStop, { once: true });
-        w2.addEventListener('transitionend', onStop, { once: true });
-        setTimeout(() => { if (stopped < 2) { stopped = 2; onStop(); } }, (Math.max(d1, d2) * 1000) + 200);
-        return true;
+ function showWheelSelector() {
+    if (participants.length < 2) {
+        gameMessageSpan.innerText = "Need at least 2 participants";
+        return false;
     }
 
+    // ---- FAIR SELECTION: shuffle participants using crypto ----
+    let shuffled = [...participants];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+    }
+    let p1 = shuffled[0];
+    let p2 = shuffled[1];
+    if (p1 === p2 && participants.length > 1) {
+        p2 = shuffled[2] || shuffled[1];
+    }
+
+    // Avoid back-to-back same pair
+    if (lastSelectedPair && participants.length > 2) {
+        const currentPair = [p1.name, p2.name].sort().join('|');
+        if (currentPair === lastSelectedPair) {
+            p1 = shuffled[2];
+            p2 = shuffled[3] || shuffled[0];
+            if (p1 === p2) p2 = shuffled.find(p => p !== p1);
+        }
+    }
+    lastSelectedPair = [p1.name, p2.name].sort().join('|');
+
+    // ---- BUILD WHEEL (original structure) ----
+    const overlay = document.createElement('div');
+    overlay.className = 'wheel-overlay';
+    overlay.innerHTML = `
+        <div class="wheel-container">
+            <div class="wheel-title">⚡ Selecting Duelists ⚡</div>
+            <div class="wheels">
+                <div class="wheel">
+                    <div class="wheel-label">Player 1</div>
+                    <div class="wheel-viewport">
+                        <div id="wheel1Scroller" class="wheel-scroller"></div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+                </div>
+                <div class="wheel">
+                    <div class="wheel-label">Player 2</div>
+                    <div class="wheel-viewport">
+                        <div id="wheel2Scroller" class="wheel-scroller"></div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const names = participants.map(p => p.name);
+    const repeatFactor = 100;
+    let repeated = [];
+    for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
+
+    const w1 = document.getElementById('wheel1Scroller');
+    const w2 = document.getElementById('wheel2Scroller');
+    w1.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+    w2.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+
+    const firstItem = w1.querySelector('.wheel-item');
+    const itemHeight = firstItem.getBoundingClientRect().height;
+    const viewportHeight = 120;
+    const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+    const totalItems = repeated.length;
+
+    // Find valid indices (25 to totalItems-25) for p1 and p2
+    const minIndex = 25;
+    const maxIndex = totalItems - 25;
+    let idx1 = -1, idx2 = -1;
+    for (let i = minIndex; i <= maxIndex; i++) {
+        if (repeated[i] === p1.name) {
+            idx1 = i;
+            break;
+        }
+    }
+    if (idx1 === -1) idx1 = minIndex;
+    for (let i = minIndex; i <= maxIndex; i++) {
+        if (repeated[i] === p2.name && i !== idx1) {
+            idx2 = i;
+            break;
+        }
+    }
+    if (idx2 === -1) {
+        for (let i = minIndex; i <= maxIndex; i++) {
+            if (repeated[i] === p2.name) {
+                idx2 = i;
+                break;
+            }
+        }
+    }
+    if (idx2 === -1) idx2 = (idx1 + 1) % totalItems;
+
+    // ---- DRAMATIC WHEEL ANIMATION (8–12 sec, extremely fast start, smooth stop) ----
+    const d1 = Math.random() * 4 + 8;   // 8–12 sec
+    const d2 = Math.random() * 4 + 8;
+    w1.style.transition = `transform ${d1}s cubic-bezier(0.05, 0.95, 0.2, 1)`;
+    w2.style.transition = `transform ${d2}s cubic-bezier(0.05, 0.95, 0.2, 1)`;
+    w1.style.transform = `translateY(${-(idx1 * itemHeight) + centerOffset}px)`;
+    w2.style.transform = `translateY(${-(idx2 * itemHeight) + centerOffset}px)`;
+
+    playWheelSpinSound();
+
+    let stopped = 0;
+    function onStop() {
+        stopped++;
+        if (stopped !== 2) return;
+        overlay.remove();
+        selectedPlayer1 = p1;
+        selectedPlayer2 = p2;
+        updateSelectedDisplay();
+        renderParticipants();
+        resetGameVisualsOnly();
+        gameMessageSpan.innerText = `Selected: ${p1.name} vs ${p2.name}`;
+        startReadyCheckContainer.style.display = 'block';
+        showReadyCheckOverlay(selectedPlayer1, selectedPlayer2);
+        markStateDirty();
+        playDing();
+    }
+
+    w1.addEventListener('transitionend', onStop, { once: true });
+    w2.addEventListener('transitionend', onStop, { once: true });
+    setTimeout(() => {
+        if (stopped < 2) {
+            stopped = 2;
+            onStop();
+        }
+    }, (Math.max(d1, d2) * 1000) + 200);
+    return true;
+}
     // ========== READY CHECK OVERLAY ==========
     function showReadyCheckOverlay(player1, player2) {
         if (!player1 || !player2) return;
@@ -1434,7 +1501,7 @@
         input.focus();
     }
 
-    // ========== DUEL ==========
+    // ========== DUEL (with lag fixes) ==========
     function buildAndShuffleDeck() {
         let d = [];
         for (const s of allSuits) for (const r of allRanks) d.push({ rank: r, suitLetter: s, display: r + suitFull[s], code: r + s });
@@ -1463,6 +1530,7 @@
         }
     }
 
+    // Fixed: preload next card to reduce lag
     function renderCardToSlot(slot, card) {
         if (!card) { slot.innerHTML = '<div class="card-placeholder">NO CARD</div>'; return; }
         slot.innerHTML = '';
@@ -1508,6 +1576,13 @@
         if (currentTurn === 0) renderCardToSlot(p1CardSlot, card); else renderCardToSlot(p2CardSlot, card);
         playDrawSound();
 
+        // Preload next card to reduce lag on next flip
+        if (deck.length > 0) {
+            const nextCard = deck[deck.length - 1];
+            const nextImg = new Image();
+            nextImg.src = getCardImageUrl(nextCard.rank, nextCard.suitLetter);
+        }
+
         let isWin = false;
         let winReason = '';
         if (presetWinEnabled && presetCardCode) {
@@ -1540,7 +1615,7 @@
         document.querySelectorAll('.player-card').forEach(c => c.classList.remove('active-turn'));
         const ac = currentTurn === 0 ? $('player1Card') : $('player2Card');
         if (ac) ac.classList.add('active-turn');
-        if (isDuelActive && !duelWinner) { if (drawTimeout) clearTimeout(drawTimeout); drawTimeout = setTimeout(drawStep, 550); }
+        if (isDuelActive && !duelWinner) { if (drawTimeout) clearTimeout(drawTimeout); drawTimeout = setTimeout(drawStep, 650); } // increased from 550
     }
 
     function startAceDuel() {
