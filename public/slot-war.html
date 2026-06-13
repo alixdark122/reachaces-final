@@ -208,6 +208,8 @@
                     <div id="teamBList" class="team-list"></div>
                 </div>
             </div>
+            <!-- Looping test video – no frame, no background, just the video -->
+            
         </div>
 
         <div class="right-column">
@@ -591,7 +593,8 @@
         const topProviderList = [
             "Pragmatic Play", "Titan Gaming", "Twist Gaming", "Uppercut Gaming",
             "BGaming", "Hacksaw Gaming", "Backseat Gaming", "Donut Gaming",
-            "Unchained", "Colorful Play", "Paperclip Gaming", "Valkyrie", "Massive Studios"
+            "Unchained", "Colorful Play", "Paperclip Gaming", "Valkyrie", "Massive Studios", "phantom_interactive",
+            "Black Coffee Studios", "Knucklehead Syndicate", "GG Gaming",
         ];
 
         function saveFilterState() {
@@ -796,105 +799,105 @@
         });
 
         // ========== WINNER WHEEL ==========
-       function showWheelOverlay(team) {
-    let teamMembers = participants.filter(p => p.team === team);
-    if (teamMembers.length === 0) {
-        alert(`No members in Team ${team}.`);
-        return false;
-    }
-
-    // ---- CRYPTO SHUFFLE (fair randomness) ----
-    let shuffled = [...teamMembers];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
-        [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
-    }
-    let winner = shuffled[0];
-    const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
-    if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) {
-        winner = shuffled[1] || shuffled[0];
-    }
-    const winnerName = winner.name;
-    if (team === 'A') lastWinnerA = winnerName;
-    else lastWinnerB = winnerName;
-
-    // ---- BUILD WHEEL OVERLAY ----
-    const names = teamMembers.map(p => p.name);
-    const overlay = document.createElement('div');
-    overlay.className = 'wheel-overlay';
-    overlay.innerHTML = `
-        <div class="wheel-container">
-            <div class="wheel-title">Picking Winner from Team ${team}</div>
-            <div class="wheel-viewport">
-                <div id="wheelScroller" class="wheel-scroller"></div>
-                <div class="wheel-pointer"></div>
-            </div>
-            <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
-            <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
-        </div>`;
-    document.body.appendChild(overlay);
-
-    const scroller = document.getElementById('wheelScroller');
-    const repeatFactor = 50;
-    let repeated = [];
-    for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
-    scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
-
-    // Force reflow to get correct dimensions
-    scroller.offsetHeight;
-    const firstItem = scroller.querySelector('.wheel-item');
-    const itemHeight = firstItem.getBoundingClientRect().height;
-    const viewportHeight = 200;
-    const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
-    const totalItems = repeated.length;
-
-    // ---- Find valid index within visible range (25 to totalItems-25) ----
-    const minIndex = 25;
-    const maxIndex = totalItems - 25;
-    let targetIdx = -1;
-    for (let i = minIndex; i <= maxIndex; i++) {
-        if (repeated[i] === winnerName) {
-            targetIdx = i;
-            break;
-        }
-    }
-    if (targetIdx === -1) {
-        // fallback: any occurrence within range (should never happen)
-        for (let i = minIndex; i <= maxIndex; i++) {
-            if (repeated[i] === winnerName) {
-                targetIdx = i;
-                break;
+        function showWheelOverlay(team) {
+            let teamMembers = participants.filter(p => p.team === team);
+            if (teamMembers.length === 0) {
+                alert(`No members in Team ${team}.`);
+                return false;
             }
+
+            // ---- CRYPTO SHUFFLE (fair randomness) ----
+            let shuffled = [...teamMembers];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+                [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+            }
+            let winner = shuffled[0];
+            const lastWinner = (team === 'A') ? lastWinnerA : lastWinnerB;
+            if (teamMembers.length > 1 && lastWinner && winner.name === lastWinner) {
+                winner = shuffled[1] || shuffled[0];
+            }
+            const winnerName = winner.name;
+            if (team === 'A') lastWinnerA = winnerName;
+            else lastWinnerB = winnerName;
+
+            // ---- BUILD WHEEL OVERLAY ----
+            const names = teamMembers.map(p => p.name);
+            const overlay = document.createElement('div');
+            overlay.className = 'wheel-overlay';
+            overlay.innerHTML = `
+                <div class="wheel-container">
+                    <div class="wheel-title">Picking Winner from Team ${team}</div>
+                    <div class="wheel-viewport">
+                        <div id="wheelScroller" class="wheel-scroller"></div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+                    <div id="wheelResult" style="margin-top:20px;font-size:1.2rem;color:#19C6FD;"></div>
+                    <button id="closeWheelBtn" style="margin-top:20px;padding:8px 24px;background:#19C6FD;border:none;border-radius:60px;font-weight:bold;">Close</button>
+                </div>`;
+            document.body.appendChild(overlay);
+
+            const scroller = document.getElementById('wheelScroller');
+            const repeatFactor = 50;
+            let repeated = [];
+            for (let i = 0; i < repeatFactor; i++) repeated.push(...names);
+            scroller.innerHTML = repeated.map(n => `<div class="wheel-item">${escapeHtml(n)}</div>`).join('');
+
+            // Force reflow to get correct dimensions
+            scroller.offsetHeight;
+            const firstItem = scroller.querySelector('.wheel-item');
+            const itemHeight = firstItem.getBoundingClientRect().height;
+            const viewportHeight = 200;
+            const centerOffset = (viewportHeight / 2) - (itemHeight / 2);
+            const totalItems = repeated.length;
+
+            // ---- Find valid index within visible range (25 to totalItems-25) ----
+            const minIndex = 25;
+            const maxIndex = totalItems - 25;
+            let targetIdx = -1;
+            for (let i = minIndex; i <= maxIndex; i++) {
+                if (repeated[i] === winnerName) {
+                    targetIdx = i;
+                    break;
+                }
+            }
+            if (targetIdx === -1) {
+                // fallback: any occurrence within range (should never happen)
+                for (let i = minIndex; i <= maxIndex; i++) {
+                    if (repeated[i] === winnerName) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+            }
+            if (targetIdx === -1) targetIdx = minIndex;
+
+            // Calculate target offset (no random jitter)
+            let targetOffset = -(targetIdx * itemHeight) + centerOffset;
+            const maxOffset = -(0 * itemHeight) + centerOffset;
+            const minOffset = -((totalItems - 1) * itemHeight) + centerOffset;
+            targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
+
+            // ---- DRAMATIC ANIMATION (8–12 sec, extremely fast start, smooth stop) ----
+            const duration = Math.random() * 4 + 8;   // 8–12 seconds
+            scroller.style.transition = `transform ${duration}s cubic-bezier(0.05, 0.95, 0.2, 1)`;
+            scroller.style.transform = `translateY(${targetOffset}px)`;
+
+            const resultDiv = document.getElementById('wheelResult');
+            scroller.addEventListener('transitionend', () => {
+                resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
+                playWinSound();
+                shootConfetti();
+                const slot = team === 'A' ? selectedSlotA : selectedSlotB;
+                if (slot) {
+                    addWinnerToHistory(winnerName, team, slot.name);
+                    showWinnerOverlay(winnerName, team, slot);
+                }
+            }, { once: true });
+
+            document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
+            return true;
         }
-    }
-    if (targetIdx === -1) targetIdx = minIndex;
-
-    // Calculate target offset (no random jitter)
-    let targetOffset = -(targetIdx * itemHeight) + centerOffset;
-    const maxOffset = -(0 * itemHeight) + centerOffset;
-    const minOffset = -((totalItems - 1) * itemHeight) + centerOffset;
-    targetOffset = Math.min(maxOffset, Math.max(minOffset, targetOffset));
-
-    // ---- DRAMATIC ANIMATION (8–12 sec, extremely fast start, smooth stop) ----
-    const duration = Math.random() * 4 + 8;   // 8–12 seconds
-    scroller.style.transition = `transform ${duration}s cubic-bezier(0.05, 0.95, 0.2, 1)`;
-    scroller.style.transform = `translateY(${targetOffset}px)`;
-
-    const resultDiv = document.getElementById('wheelResult');
-    scroller.addEventListener('transitionend', () => {
-        resultDiv.innerHTML = `WINNER: ${escapeHtml(winnerName)}`;
-        playWinSound();
-        shootConfetti();
-        const slot = team === 'A' ? selectedSlotA : selectedSlotB;
-        if (slot) {
-            addWinnerToHistory(winnerName, team, slot.name);
-            showWinnerOverlay(winnerName, team, slot);
-        }
-    }, { once: true });
-
-    document.getElementById('closeWheelBtn').addEventListener('click', () => overlay.remove());
-    return true;
-}
 
         // ========== RANDOM SLOT PICKER ==========
         let isSpinning = false;
